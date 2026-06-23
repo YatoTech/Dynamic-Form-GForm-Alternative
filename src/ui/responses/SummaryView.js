@@ -14,9 +14,13 @@ export class SummaryView {
     container.className = 'dfb-summary-view';
 
     const total = responses.length;
-    const lastDate = responses.length > 0
-      ? responses.reduce((latest, r) => r.submittedAt > latest ? r.submittedAt : latest, responses[0].submittedAt)
-      : null;
+    const lastDate =
+      responses.length > 0
+        ? responses.reduce(
+            (latest, r) => (r.submittedAt > latest ? r.submittedAt : latest),
+            responses[0].submittedAt,
+          )
+        : null;
 
     const statsBar = document.createElement('div');
     statsBar.className = 'dfb-summary-stats';
@@ -28,7 +32,7 @@ export class SummaryView {
     statValue1.textContent = total;
     const statLabel1 = document.createElement('div');
     statLabel1.className = 'dfb-summary-stat-label';
-    statLabel1.textContent = 'Total Respons';
+    statLabel1.textContent = 'Total Jawaban';
     statCard1.appendChild(statValue1);
     statCard1.appendChild(statLabel1);
 
@@ -37,10 +41,18 @@ export class SummaryView {
     const statValue2 = document.createElement('div');
     statValue2.className = 'dfb-summary-stat-value';
     statValue2.style.fontSize = '14px';
-    statValue2.textContent = lastDate ? new Date(lastDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+    statValue2.textContent = lastDate
+      ? new Date(lastDate).toLocaleDateString('id-ID', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : '-';
     const statLabel2 = document.createElement('div');
     statLabel2.className = 'dfb-summary-stat-label';
-    statLabel2.textContent = 'Respons Terakhir';
+    statLabel2.textContent = 'Jawaban Terakhir';
     statCard2.appendChild(statValue2);
     statCard2.appendChild(statLabel2);
 
@@ -50,18 +62,19 @@ export class SummaryView {
 
     if (total === 0) {
       const empty = document.createElement('div');
-      empty.style.cssText = 'text-align:center;padding:48px 24px;color:var(--dfb-text-secondary,#5F6368);';
+      empty.style.cssText =
+        'text-align:center;padding:48px 24px;color:var(--dfb-text-secondary,#5F6368);';
       const emptyIcon = document.createElement('div');
       emptyIcon.style.cssText = 'font-size:48px;margin-bottom:16px;';
       emptyIcon.textContent = '\uD83D\uDCCA';
       empty.appendChild(emptyIcon);
       const emptyTitle = document.createElement('p');
       emptyTitle.style.cssText = 'font-size:16px;font-weight:500;margin-bottom:4px;';
-      emptyTitle.textContent = 'Belum ada respons';
+      emptyTitle.textContent = 'Belum ada jawaban';
       empty.appendChild(emptyTitle);
       const emptyDesc = document.createElement('p');
       emptyDesc.style.cssText = 'font-size:13px;';
-      emptyDesc.textContent = 'Bagikan formulir ini untuk mulai mengumpulkan respons.';
+      emptyDesc.textContent = 'Bagikan formulir ini untuk mulai mengumpulkan jawaban.';
       empty.appendChild(emptyDesc);
       container.appendChild(empty);
       return container;
@@ -83,9 +96,12 @@ export class SummaryView {
       if (distribution.length === 0) {
         const emptyP = document.createElement('p');
         emptyP.className = 'dfb-summary-empty';
-        emptyP.textContent = 'Belum ada respons untuk pertanyaan ini.';
+        emptyP.textContent = 'Belum ada jawaban untuk pertanyaan ini.';
         chartContainer.appendChild(emptyP);
-      } else if (q.type === QUESTION_TYPES.MULTIPLE_CHOICE_GRID || q.type === QUESTION_TYPES.CHECKBOX_GRID) {
+      } else if (
+        q.type === QUESTION_TYPES.MULTIPLE_CHOICE_GRID ||
+        q.type === QUESTION_TYPES.CHECKBOX_GRID
+      ) {
         chartContainer.appendChild(renderGridSummary(q, responses));
       } else if (q.type === QUESTION_TYPES.LINEAR_SCALE) {
         chartContainer.appendChild(ScaleChart.create(distribution, total));
@@ -125,7 +141,9 @@ function renderGridSummary(question, responses) {
   const isMc = question.type === 'mc_grid';
 
   const freq = {};
-  rows.forEach((_, ri) => { freq[ri] = {}; });
+  rows.forEach((_, ri) => {
+    freq[ri] = {};
+  });
   responses.forEach((r) => {
     const answer = (r.answers || []).find((a) => a.questionId === question.questionId);
     if (!answer || !answer.value || typeof answer.value !== 'object') return;
@@ -134,7 +152,9 @@ function renderGridSummary(question, responses) {
       if (isMc) {
         freq[ri][val] = (freq[ri][val] || 0) + 1;
       } else if (Array.isArray(val)) {
-        val.forEach((v) => { freq[ri][v] = (freq[ri][v] || 0) + 1; });
+        val.forEach((v) => {
+          freq[ri][v] = (freq[ri][v] || 0) + 1;
+        });
       }
     });
   });
@@ -146,12 +166,14 @@ function renderGridSummary(question, responses) {
   const headerRow = document.createElement('tr');
 
   const thCorner = document.createElement('th');
-  thCorner.style.cssText = 'text-align:left;padding:8px;color:var(--dfb-text-secondary,#5F6368);font-weight:500;';
+  thCorner.style.cssText =
+    'text-align:left;padding:8px;color:var(--dfb-text-secondary,#5F6368);font-weight:500;';
   headerRow.appendChild(thCorner);
 
   cols.forEach((c) => {
     const th = document.createElement('th');
-    th.style.cssText = 'text-align:center;padding:8px;color:var(--dfb-text-secondary,#5F6368);font-weight:500;';
+    th.style.cssText =
+      'text-align:center;padding:8px;color:var(--dfb-text-secondary,#5F6368);font-weight:500;';
     th.textContent = c;
     headerRow.appendChild(th);
   });
@@ -161,16 +183,14 @@ function renderGridSummary(question, responses) {
 
   const tbody = document.createElement('tbody');
 
-  const maxFreq = Math.max(
-    1,
-    ...Object.values(freq).flatMap((row) => Object.values(row)),
-  );
+  const maxFreq = Math.max(1, ...Object.values(freq).flatMap((row) => Object.values(row)));
 
   rows.forEach((r, ri) => {
     const tr = document.createElement('tr');
 
     const tdLabel = document.createElement('td');
-    tdLabel.style.cssText = 'padding:8px;color:var(--dfb-text-primary,#202124);border-top:1px solid var(--dfb-border-color,#DADCE0);';
+    tdLabel.style.cssText =
+      'padding:8px;color:var(--dfb-text-primary,#202124);border-top:1px solid var(--dfb-border-color,#DADCE0);';
     tdLabel.textContent = r;
     tr.appendChild(tdLabel);
 

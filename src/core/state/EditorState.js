@@ -22,7 +22,7 @@ export class EditorState {
     this.isDirty = false;
     this.undoStack = [];
     this.redoStack = [];
-    this.activeQuestionId = null;
+    this.activeQuestionId = form.questions[0]?.questionId || null;
     this.activeSectionId = form.sections[0]?.sectionId || null;
     eventBus.emit('form:loaded', form);
   }
@@ -60,7 +60,9 @@ export class EditorState {
   }
 
   setActiveQuestion(questionId) {
+    if (this.activeQuestionId === questionId) return;
     this.activeQuestionId = questionId;
+    eventBus.emit('active-question:changed', questionId);
   }
 
   markClean() {

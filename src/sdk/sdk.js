@@ -21,16 +21,15 @@ const DynamicForm = {
   version: '1.0.0',
 
   render({ target, formId, theme = {} } = {}) {
-    const container = typeof target === 'string'
-      ? document.querySelector(target)
-      : target;
+    const container = typeof target === 'string' ? document.querySelector(target) : target;
     if (!container) {
       console.error('[DynamicForm] Target container tidak ditemukan:', target);
       return;
     }
 
     if (theme && Object.keys(theme).length > 0) {
-      if (theme.primaryColor) container.style.setProperty('--dfb-primary-color', theme.primaryColor);
+      if (theme.primaryColor)
+        container.style.setProperty('--dfb-primary-color', theme.primaryColor);
       if (theme.bgColor) container.style.setProperty('--dfb-bg-color', theme.bgColor);
     }
 

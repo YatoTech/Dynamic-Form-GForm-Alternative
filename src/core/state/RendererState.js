@@ -3,6 +3,7 @@ import { eventBus } from '../utils/eventBus.js';
 export class RendererState {
   constructor() {
     this.currentSectionIndex = 0;
+    this.sectionHistory = [];
     this.answers = {};
     this.errors = {};
     this.isSubmitting = false;
@@ -32,9 +33,15 @@ export class RendererState {
     return Object.keys(this.errors).length > 0;
   }
 
-  setSection(index) {
-    this.currentSectionIndex = index;
-    eventBus.emit('section:navigate', index);
+  setSection(index, isBack = false) {
+    if (isBack) {
+      const prev = this.sectionHistory.pop();
+      this.currentSectionIndex = prev !== undefined ? prev : index;
+    } else {
+      this.sectionHistory.push(this.currentSectionIndex);
+      this.currentSectionIndex = index;
+    }
+    eventBus.emit('section:navigate', this.currentSectionIndex);
   }
 
   startSubmit() {
@@ -49,6 +56,7 @@ export class RendererState {
 
   reset() {
     this.currentSectionIndex = 0;
+    this.sectionHistory = [];
     this.answers = {};
     this.errors = {};
     this.isSubmitting = false;

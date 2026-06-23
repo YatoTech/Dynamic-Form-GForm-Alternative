@@ -3,128 +3,298 @@ import { eventBus } from '../../core/utils/eventBus.js';
 
 export class SettingsPanel {
   static render(form, container) {
-    container.textContent = '';
+    container.innerHTML = '';
+
     const panel = document.createElement('div');
     panel.className = 'dfb-settings-panel';
     container.appendChild(panel);
 
     const title = document.createElement('h3');
     title.className = 'dfb-settings-section-title';
-    title.textContent = 'Setelan Formulir';
+    title.textContent = 'Setelan';
     panel.appendChild(title);
 
-    const responsesSection = document.createElement('div');
-    responsesSection.style.marginBottom = '24px';
+    // Helpers to build sections
+    const accordionJawaban = createAccordionGroup(
+      'Jawaban',
+      'Mengelola cara jawaban dikumpulkan dan dilindungi',
+      true, // expanded by default
+    );
+    panel.appendChild(accordionJawaban.group);
 
-    const responsesLabel = document.createElement('p');
-    responsesLabel.style.cssText = 'font-size:13px;font-weight:500;color:var(--dfb-text-secondary,#5F6368);margin-bottom:12px;';
-    responsesLabel.textContent = 'RESPONS';
-    responsesSection.appendChild(responsesLabel);
+    const acceptRow = createToggleRow(
+      'Menerima jawaban',
+      'Mengizinkan responden mengisi formulir ini',
+      'dfb-settings-accept',
+      form.metadata.isAcceptingResponses,
+    );
+    accordionJawaban.content.appendChild(acceptRow);
 
-    const acceptLabel = document.createElement('label');
-    acceptLabel.className = 'dfb-flex-center';
-    acceptLabel.style.cssText = 'gap:10px;padding:8px 0;cursor:pointer;';
+    const limitRow = createToggleRow(
+      'Batasi ke 1 jawaban',
+      'Batasi responden agar hanya dapat mengirimkan formulir satu kali (membutuhkan local storage)',
+      'dfb-settings-limit',
+      form.metadata.limitOneResponse,
+    );
+    accordionJawaban.content.appendChild(limitRow);
 
-    const acceptCheckbox = document.createElement('input');
-    acceptCheckbox.type = 'checkbox';
-    acceptCheckbox.className = 'dfb-settings-accept';
-    acceptCheckbox.checked = form.metadata.isAcceptingResponses;
-    acceptLabel.appendChild(acceptCheckbox);
+    const emailRow = createToggleRow(
+      'Kumpulkan alamat email',
+      'Responden wajib mengisi alamat email mereka',
+      'dfb-settings-collect-email',
+      form.metadata.collectEmail,
+    );
+    accordionJawaban.content.appendChild(emailRow);
 
-    const acceptText = document.createElement('span');
-    acceptText.style.cssText = 'font-size:14px;color:var(--dfb-text-primary,#202124);';
-    acceptText.textContent = 'Menerima respons';
-    acceptLabel.appendChild(acceptText);
-    responsesSection.appendChild(acceptLabel);
+    const maxResponsesRow = createInputRow(
+      'Batas maksimal respons',
+      'Batasi jumlah respons maksimum yang diterima (kosongkan untuk tidak terbatas)',
+      'Contoh: 100',
+      'dfb-settings-max-responses',
+      form.metadata.maxResponses || '',
+      'number',
+    );
+    accordionJawaban.content.appendChild(maxResponsesRow);
 
-    const acceptHint = document.createElement('p');
-    acceptHint.className = 'dfb-settings-hint';
-    acceptHint.style.marginLeft = '28px';
-    acceptHint.textContent = 'Nonaktifkan untuk menutup formulir';
-    responsesSection.appendChild(acceptHint);
+    const closingDateRow = createInputRow(
+      'Tutup otomatis pada',
+      'Formulir akan berhenti menerima jawaban pada waktu yang ditentukan',
+      '',
+      'dfb-settings-closing-date',
+      form.metadata.closingDate || '',
+      'datetime-local',
+    );
+    accordionJawaban.content.appendChild(closingDateRow);
 
-    const limitLabel = document.createElement('label');
-    limitLabel.className = 'dfb-flex-center';
-    limitLabel.style.cssText = 'gap:10px;padding:8px 0;cursor:pointer;';
+    const accordionPresentasi = createAccordionGroup(
+      'Presentasi',
+      'Mengelola cara formulir dan jawaban ditampilkan',
+      false,
+    );
+    panel.appendChild(accordionPresentasi.group);
 
-    const limitCheckbox = document.createElement('input');
-    limitCheckbox.type = 'checkbox';
-    limitCheckbox.className = 'dfb-settings-limit';
-    limitCheckbox.checked = form.metadata.limitOneResponse;
-    limitLabel.appendChild(limitCheckbox);
+    const progressRow = createToggleRow(
+      'Tampilkan bilah kemajuan (Progress Bar)',
+      'Menampilkan indikator persentase pengisian halaman di bagian bawah formulir',
+      'dfb-settings-progress',
+      form.metadata.showProgressBar ?? false,
+    );
+    accordionPresentasi.content.appendChild(progressRow);
 
-    const limitText = document.createElement('span');
-    limitText.style.cssText = 'font-size:14px;color:var(--dfb-text-primary,#202124);';
-    limitText.textContent = 'Batasi satu respons per orang';
-    limitLabel.appendChild(limitText);
-    responsesSection.appendChild(limitLabel);
+    const shuffleRow = createToggleRow(
+      'Acak urutan pertanyaan',
+      'Mengacak susunan pertanyaan untuk setiap responden',
+      'dfb-settings-shuffle',
+      form.metadata.shuffleQuestions ?? false,
+    );
+    accordionPresentasi.content.appendChild(shuffleRow);
 
-    const limitHint = document.createElement('p');
-    limitHint.className = 'dfb-settings-hint';
-    limitHint.style.marginLeft = '28px';
-    limitHint.textContent = 'Mencegah pengiriman lebih dari satu kali';
-    responsesSection.appendChild(limitHint);
-    panel.appendChild(responsesSection);
+    const summaryRow = createToggleRow(
+      'Tampilkan ringkasan jawaban ke responden',
+      'Mengizinkan responden melihat ringkasan jawaban setelah mengirim formulir',
+      'dfb-settings-show-summary',
+      form.metadata.showSummaryToRespondents ?? false,
+    );
+    accordionPresentasi.content.appendChild(summaryRow);
 
-    const confirmationSection = document.createElement('div');
-    confirmationSection.style.marginBottom = '24px';
+    const confirmRow = createInputRow(
+      'Pesan konfirmasi',
+      'Pesan yang ditampilkan setelah responden menyerahkan jawaban',
+      'Jawaban Anda telah tercatat.',
+      'dfb-settings-confirmation',
+      form.metadata.confirmationMessage || '',
+      'textarea',
+    );
+    accordionPresentasi.content.appendChild(confirmRow);
 
-    const confirmLabel = document.createElement('p');
-    confirmLabel.style.cssText = 'font-size:13px;font-weight:500;color:var(--dfb-text-secondary,#5F6368);margin-bottom:12px;';
-    confirmLabel.textContent = 'PESAN KONFIRMASI';
-    confirmationSection.appendChild(confirmLabel);
+    const accordionWebhook = createAccordionGroup(
+      'Webhook (Opsional)',
+      'Mengirimkan data jawaban secara real-time ke URL eksternal',
+      false,
+    );
+    panel.appendChild(accordionWebhook.group);
 
-    const textarea = document.createElement('textarea');
-    textarea.className = 'dfb-settings-input dfb-settings-confirmation';
-    textarea.maxLength = 500;
-    textarea.style.cssText = 'resize:vertical;min-height:60px;padding:10px 12px;';
-    textarea.value = form.metadata.confirmationMessage;
-    confirmationSection.appendChild(textarea);
-    panel.appendChild(confirmationSection);
+    const webhookUrlRow = createInputRow(
+      'URL Webhook',
+      'Kirim payload JSON berisi data jawaban via HTTP POST',
+      'https://contoh.com/webhook',
+      'dfb-settings-webhook-url',
+      form.metadata.webhookUrl || '',
+      'url',
+    );
+    accordionWebhook.content.appendChild(webhookUrlRow);
 
-    const webhookSection = document.createElement('div');
-    webhookSection.style.marginBottom = '24px';
-
-    const webhookLabel = document.createElement('p');
-    webhookLabel.style.cssText = 'font-size:13px;font-weight:500;color:var(--dfb-text-secondary,#5F6368);margin-bottom:12px;';
-    webhookLabel.textContent = 'WEBHOOK (opsional)';
-    webhookSection.appendChild(webhookLabel);
-
-    const urlLabel = document.createElement('label');
-    urlLabel.style.cssText = 'display:block;font-size:13px;color:var(--dfb-text-primary,#202124);margin-bottom:4px;';
-    urlLabel.textContent = 'URL Webhook';
-    webhookSection.appendChild(urlLabel);
-
-    const urlInput = document.createElement('input');
-    urlInput.type = 'url';
-    urlInput.className = 'dfb-settings-input dfb-settings-webhook-url dfb-mb-sm';
-    urlInput.value = form.metadata.webhookUrl || '';
-    urlInput.placeholder = 'https://contoh.com/webhook';
-    urlInput.maxLength = 2000;
-    webhookSection.appendChild(urlInput);
-
-    const secretLabel = document.createElement('label');
-    secretLabel.style.cssText = 'display:block;font-size:13px;color:var(--dfb-text-primary,#202124);margin-bottom:4px;';
-    secretLabel.textContent = 'Rahasia (HMAC)';
-    webhookSection.appendChild(secretLabel);
-
-    const secretInput = document.createElement('input');
-    secretInput.type = 'password';
-    secretInput.className = 'dfb-settings-input dfb-settings-webhook-secret';
-    secretInput.value = form.metadata.webhookSecret || '';
-    secretInput.placeholder = 'Opsional';
-    secretInput.maxLength = 500;
-    webhookSection.appendChild(secretInput);
-
-    const webhookHint = document.createElement('p');
-    webhookHint.className = 'dfb-settings-hint';
-    webhookHint.style.marginTop = '4px';
-    webhookHint.textContent = 'Data respons akan dikirim ke URL ini setiap kali form disubmit';
-    webhookSection.appendChild(webhookHint);
-    panel.appendChild(webhookSection);
+    const webhookSecretRow = createInputRow(
+      'Rahasia Webhook (HMAC)',
+      'Kunci rahasia untuk memverifikasi tanda tangan HMAC-SHA256 dari payload yang dikirim',
+      'Kunci Rahasia HMAC',
+      'dfb-settings-webhook-secret',
+      form.metadata.webhookSecret || '',
+      'password',
+    );
+    accordionWebhook.content.appendChild(webhookSecretRow);
 
     attachEvents(form, panel);
+
+    // Sync accept toggle if updated from other views
+    const onFormUpdated = (updatedForm) => {
+      if (updatedForm.formId === form.formId) {
+        const acceptEl = panel.querySelector('.dfb-settings-accept');
+        if (acceptEl) acceptEl.checked = updatedForm.metadata.isAcceptingResponses;
+        const emailEl = panel.querySelector('.dfb-settings-collect-email');
+        if (emailEl) emailEl.checked = updatedForm.metadata.collectEmail;
+        const limitEl = panel.querySelector('.dfb-settings-limit');
+        if (limitEl) limitEl.checked = updatedForm.metadata.limitOneResponse;
+        const summaryEl = panel.querySelector('.dfb-settings-show-summary');
+        if (summaryEl) summaryEl.checked = updatedForm.metadata.showSummaryToRespondents;
+      }
+    };
+    eventBus.on('form:updated', onFormUpdated);
+
+    if (container._settingsListener) {
+      eventBus.off('form:updated', container._settingsListener);
+    }
+    container._settingsListener = onFormUpdated;
   }
+}
+
+// ─── HELPER FUNCTIONS ───
+
+function createAccordionGroup(titleVal, subtitleVal, isExpandedByDefault = false) {
+  const group = document.createElement('div');
+  group.className = 'dfb-settings-group';
+  if (isExpandedByDefault) {
+    group.classList.add('dfb-settings-group--expanded');
+  }
+
+  const header = document.createElement('div');
+  header.className = 'dfb-settings-group-header';
+
+  const titleWrap = document.createElement('div');
+  titleWrap.className = 'dfb-settings-group-title-wrap';
+
+  const title = document.createElement('h4');
+  title.className = 'dfb-settings-group-title';
+  title.textContent = titleVal;
+  titleWrap.appendChild(title);
+
+  const subtitle = document.createElement('div');
+  subtitle.className = 'dfb-settings-group-subtitle';
+  subtitle.textContent = subtitleVal;
+  titleWrap.appendChild(subtitle);
+
+  header.appendChild(titleWrap);
+
+  const chevron = document.createElement('div');
+  chevron.className = 'dfb-settings-group-chevron';
+  chevron.innerHTML = `
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  `;
+  header.appendChild(chevron);
+  group.appendChild(header);
+
+  const content = document.createElement('div');
+  content.className = 'dfb-settings-group-content';
+  group.appendChild(content);
+
+  header.addEventListener('click', () => {
+    const isExpanded = group.classList.contains('dfb-settings-group--expanded');
+    if (isExpanded) {
+      group.classList.remove('dfb-settings-group--expanded');
+    } else {
+      group.classList.add('dfb-settings-group--expanded');
+    }
+  });
+
+  return { group, content };
+}
+
+function createToggleRow(labelVal, hintVal, className, isChecked) {
+  const row = document.createElement('div');
+  row.className = 'dfb-settings-row';
+
+  const labelGroup = document.createElement('div');
+  labelGroup.className = 'dfb-settings-label-group';
+
+  const label = document.createElement('div');
+  label.className = 'dfb-settings-label';
+  label.textContent = labelVal;
+  labelGroup.appendChild(label);
+
+  const hint = document.createElement('div');
+  hint.className = 'dfb-settings-hint';
+  hint.textContent = hintVal;
+  labelGroup.appendChild(hint);
+
+  row.appendChild(labelGroup);
+
+  const toggleLabel = document.createElement('label');
+  toggleLabel.className = 'dfb-toggle';
+
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.className = className;
+  checkbox.checked = isChecked;
+
+  const slider = document.createElement('span');
+  slider.className = 'dfb-toggle-slider';
+
+  toggleLabel.appendChild(checkbox);
+  toggleLabel.appendChild(slider);
+  row.appendChild(toggleLabel);
+
+  return row;
+}
+
+function createInputRow(
+  labelVal,
+  hintVal,
+  placeholderVal,
+  inputClassName,
+  value,
+  inputType = 'text',
+) {
+  const row = document.createElement('div');
+  row.className = 'dfb-settings-row';
+  row.style.flexDirection = 'column';
+  row.style.alignItems = 'stretch';
+  row.style.gap = '8px';
+
+  const labelGroup = document.createElement('div');
+  labelGroup.className = 'dfb-settings-label-group';
+
+  const label = document.createElement('div');
+  label.className = 'dfb-settings-label';
+  label.textContent = labelVal;
+  labelGroup.appendChild(label);
+
+  const hint = document.createElement('div');
+  hint.className = 'dfb-settings-hint';
+  hint.textContent = hintVal;
+  labelGroup.appendChild(hint);
+
+  row.appendChild(labelGroup);
+
+  const inputContainer = document.createElement('div');
+  inputContainer.className = 'dfb-settings-input-container';
+
+  let inputEl;
+  if (inputType === 'textarea') {
+    inputEl = document.createElement('textarea');
+    inputEl.className = `${inputClassName} dfb-settings-textarea`;
+  } else {
+    inputEl = document.createElement('input');
+    inputEl.type = inputType;
+    inputEl.className = `${inputClassName} dfb-settings-text-input`;
+  }
+  inputEl.placeholder = placeholderVal;
+  inputEl.value = value || '';
+  inputContainer.appendChild(inputEl);
+  row.appendChild(inputContainer);
+
+  return row;
 }
 
 function attachEvents(form, container) {
@@ -148,6 +318,57 @@ function attachEvents(form, container) {
   const limitToggle = container.querySelector('.dfb-settings-limit');
   limitToggle.addEventListener('change', () => {
     form.metadata.limitOneResponse = limitToggle.checked;
+    form.metadata.updatedAt = new Date().toISOString();
+    scheduleSave();
+  });
+
+  const emailToggle = container.querySelector('.dfb-settings-collect-email');
+  if (emailToggle) {
+    emailToggle.addEventListener('change', () => {
+      form.metadata.collectEmail = emailToggle.checked;
+      form.metadata.updatedAt = new Date().toISOString();
+      scheduleSave();
+    });
+  }
+
+  const maxResponsesInput = container.querySelector('.dfb-settings-max-responses');
+  if (maxResponsesInput) {
+    maxResponsesInput.addEventListener('change', () => {
+      const val = parseInt(maxResponsesInput.value, 10);
+      form.metadata.maxResponses = !isNaN(val) && val > 0 ? val : null;
+      form.metadata.updatedAt = new Date().toISOString();
+      scheduleSave();
+    });
+  }
+
+  const closingDateInput = container.querySelector('.dfb-settings-closing-date');
+  if (closingDateInput) {
+    closingDateInput.addEventListener('change', () => {
+      form.metadata.closingDate = closingDateInput.value || null;
+      form.metadata.updatedAt = new Date().toISOString();
+      scheduleSave();
+    });
+  }
+
+  const summaryToggle = container.querySelector('.dfb-settings-show-summary');
+  if (summaryToggle) {
+    summaryToggle.addEventListener('change', () => {
+      form.metadata.showSummaryToRespondents = summaryToggle.checked;
+      form.metadata.updatedAt = new Date().toISOString();
+      scheduleSave();
+    });
+  }
+
+  const progressToggle = container.querySelector('.dfb-settings-progress');
+  progressToggle.addEventListener('change', () => {
+    form.metadata.showProgressBar = progressToggle.checked;
+    form.metadata.updatedAt = new Date().toISOString();
+    scheduleSave();
+  });
+
+  const shuffleToggle = container.querySelector('.dfb-settings-shuffle');
+  shuffleToggle.addEventListener('change', () => {
+    form.metadata.shuffleQuestions = shuffleToggle.checked;
     form.metadata.updatedAt = new Date().toISOString();
     scheduleSave();
   });

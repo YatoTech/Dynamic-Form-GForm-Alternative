@@ -1,6 +1,10 @@
 import { FormManager } from '../../core/form/FormManager.js';
 import { RendererState } from '../../core/state/RendererState.js';
-import { validateField, validateChoices, validateGrid } from '../../core/engine/ValidationEngine.js';
+import {
+  validateField,
+  validateChoices,
+  validateGrid,
+} from '../../core/engine/ValidationEngine.js';
 import { evaluateBranching } from '../../core/engine/LogicEngine.js';
 import { LocalStorageAdapter } from '../../core/storage/LocalStorageAdapter.js';
 import { WebhookAdapter } from '../../core/storage/WebhookAdapter.js';
@@ -8,6 +12,7 @@ import { ProgressBar } from './ProgressBar.js';
 import { SectionView } from './SectionView.js';
 import { ConfirmationPage } from './ConfirmationPage.js';
 import { QUESTION_TYPES } from '../../core/form/QuestionTypes.js';
+import { applyTheme } from '../../core/engine/ThemeEngine.js';
 
 const renderState = new RendererState();
 
@@ -30,16 +35,52 @@ export function render(container, options = {}) {
     return;
   }
 
-  if (!form.metadata.isAcceptingResponses && !isPreview) {
-    showClosed(container, 'Formulir ini sudah tidak menerima respons');
-    return;
-  }
+  applyTheme(form.theme);
 
-  if (form.metadata.limitOneResponse && !isPreview) {
-    const existing = (new LocalStorageAdapter().get('responses') || []).filter((r) => r.formId === formId);
-    if (existing.length > 0) {
-      showClosed(container, 'Anda sudah mengirimkan respons. Formulir ini hanya menerima satu respons per orang.');
+  if (!isPreview) {
+    if (!form.metadata.isAcceptingResponses) {
+      showClosed(
+        container,
+        form.metadata.confirmationMessageClosed || 'Formulir ini sudah tidak menerima jawaban',
+      );
       return;
+    }
+
+    if (form.metadata.limitOneResponse) {
+      const existing = (new LocalStorageAdapter().get('responses') || []).filter(
+        (r) => r.formId === formId,
+      );
+      if (existing.length > 0) {
+        showClosed(
+          container,
+          'Anda sudah mengirimkan jawaban. Formulir ini hanya menerima satu jawaban per orang.',
+        );
+        return;
+      }
+    }
+
+    if (form.metadata.maxResponses != null) {
+      const existingCount = (new LocalStorageAdapter().get('responses') || []).filter(
+        (r) => r.formId === formId,
+      ).length;
+      if (existingCount >= form.metadata.maxResponses) {
+        showClosed(
+          container,
+          'Formulir ini sudah tidak menerima jawaban karena telah mencapai batas maksimal respons.',
+        );
+        return;
+      }
+    }
+
+    if (form.metadata.closingDate) {
+      const closingTime = new Date(form.metadata.closingDate).getTime();
+      if (!isNaN(closingTime) && Date.now() > closingTime) {
+        showClosed(
+          container,
+          'Formulir ini sudah tidak menerima jawaban karena batas waktu pengisian telah berakhir.',
+        );
+        return;
+      }
     }
   }
 
@@ -51,7 +92,7 @@ export function render(container, options = {}) {
   if (isPreview) {
     const banner = document.createElement('div');
     banner.className = 'gf-page-preview';
-    banner.textContent = '\u26A1 MODE PRATINJAU \u2014 Respons tidak akan disimpan';
+    banner.textContent = '\u26A1 MODE PRATINJAU \u2014 Jawaban tidak akan disimpan';
     container.appendChild(banner);
   }
 
@@ -59,15 +100,72 @@ export function render(container, options = {}) {
   main.className = 'gf-container';
   container.appendChild(main);
 
+  function navigateToSection(targetIdx, direction = 'next') {
+    const outClass = direction === 'next' ? 'gf-slide-left-out' : 'gf-slide-right-out';
+    const inClass = direction === 'next' ? 'gf-slide-left-in' : 'gf-slide-right-in';
+
+    main.classList.add(outClass);
+
+    setTimeout(() => {
+      if (direction === 'next') {
+        renderState.setSection(targetIdx, false);
+      } else {
+        renderState.setSection(targetIdx, true);
+      }
+
+      renderCurrentSection();
+
+      main.className = `gf-container ${inClass}`;
+      // force reflow
+      main.offsetHeight;
+
+      main.classList.remove(inClass);
+      main.classList.add('gf-container');
+    }, 250);
+  }
+
   function renderCurrentSection() {
     const idx = renderState.currentSectionIndex;
     const section = sections[idx];
-    const questions = section.questionIds.map((qid) => form.questions.find((q) => q.questionId === qid)).filter(Boolean);
+    let questions = section.questionIds
+      .map((qid) => form.questions.find((q) => q.questionId === qid))
+      .filter(Boolean);
+
+    // Dynamic Email Collection
+    if (idx === 0 && form.metadata.collectEmail) {
+      const emailQuestion = {
+        questionId: 'email_field',
+        type: 'short_answer',
+        title: 'Alamat email',
+        required: true,
+        description: '',
+        validation: { required: true, pattern: 'email' },
+      };
+      questions = [emailQuestion, ...questions];
+    }
 
     main.innerHTML = '';
 
     const header = document.createElement('div');
     header.className = 'gf-header-card';
+
+    // Header Image
+    if (form.metadata.headerImageUrl) {
+      header.classList.add('gf-header-card--has-image');
+      const imgContainer = document.createElement('div');
+      imgContainer.className = 'gf-header-image-container';
+
+      const img = document.createElement('img');
+      img.src = form.metadata.headerImageUrl;
+      img.className = 'gf-header-image';
+      img.alt = 'Form Header';
+      img.onerror = () => {
+        imgContainer.style.display = 'none';
+        header.classList.remove('gf-header-card--has-image');
+      };
+      imgContainer.appendChild(img);
+      header.appendChild(imgContainer);
+    }
 
     if (form.metadata.showProgressBar !== false) {
       header.appendChild(ProgressBar.create(idx, sections.length));
@@ -100,7 +198,12 @@ export function render(container, options = {}) {
     header.appendChild(body);
     main.appendChild(header);
 
-    const sectionEl = SectionView.create(section, questions, renderState.answers, renderState.errors);
+    const sectionEl = SectionView.create(
+      section,
+      questions,
+      renderState.answers,
+      renderState.errors,
+    );
     main.appendChild(sectionEl);
 
     const navRow = document.createElement('div');
@@ -115,8 +218,7 @@ export function render(container, options = {}) {
       backBtn.className = 'gf-btn-back';
       backBtn.addEventListener('click', () => {
         saveCurrentAnswers();
-        renderState.setSection(idx - 1);
-        renderCurrentSection();
+        navigateToSection(0, 'back');
         scrollToTop();
       });
       navActions.appendChild(backBtn);
@@ -144,8 +246,7 @@ export function render(container, options = {}) {
         renderState.errors = {};
         const nextIdx = evaluateBranching(renderState.answers, form.questions, sections, idx);
         const targetIdx = nextIdx < sections.length ? nextIdx : idx + 1;
-        renderState.setSection(Math.min(targetIdx, sections.length - 1));
-        renderCurrentSection();
+        navigateToSection(Math.min(targetIdx, sections.length - 1), 'next');
         scrollToTop();
       });
       navActions.appendChild(nextBtn);
@@ -174,7 +275,22 @@ export function render(container, options = {}) {
   function saveCurrentAnswers() {
     const idx = renderState.currentSectionIndex;
     const section = sections[idx];
-    const questions = section.questionIds.map((qid) => form.questions.find((q) => q.questionId === qid)).filter(Boolean);
+    let questions = section.questionIds
+      .map((qid) => form.questions.find((q) => q.questionId === qid))
+      .filter(Boolean);
+
+    if (idx === 0 && form.metadata.collectEmail) {
+      const emailQuestion = {
+        questionId: 'email_field',
+        type: 'short_answer',
+        title: 'Alamat email',
+        required: true,
+        description: '',
+        validation: { required: true, pattern: 'email' },
+      };
+      questions = [emailQuestion, ...questions];
+    }
+
     const answers = SectionView.collectAnswers(main, questions);
     Object.entries(answers).forEach(([qid, ans]) => {
       renderState.setAnswer(qid, ans.questionType, ans.value);
@@ -188,23 +304,38 @@ export function render(container, options = {}) {
     saveCurrentAnswers();
 
     const allQuestions = form.questions.filter((q) => q.type !== 'section_header');
+    if (form.metadata.collectEmail) {
+      allQuestions.unshift({
+        questionId: 'email_field',
+        type: 'short_answer',
+        title: 'Alamat email',
+        required: true,
+        description: '',
+        validation: { required: true, pattern: 'email' },
+      });
+    }
+
     const allErrors = {};
 
     allQuestions.forEach((q) => {
       const ans = renderState.answers[q.questionId];
       const value = ans ? ans.value : '';
-      const result = validateField(value, q.validation);
+      const validationConfig = Object.assign({ required: q.required }, q.validation);
+      const result = validateField(value, validationConfig);
       if (!result.isValid) {
         allErrors[q.questionId] = result.error;
       }
       if (Array.isArray(value) && q.validation?.minSelect != null) {
-        const choiceResult = validateChoices(value, q.validation);
+        const choiceResult = validateChoices(value, validationConfig);
         if (!choiceResult.isValid) {
           allErrors[q.questionId] = choiceResult.error;
         }
       }
-      if (q.type === QUESTION_TYPES.MULTIPLE_CHOICE_GRID || q.type === QUESTION_TYPES.CHECKBOX_GRID) {
-        const gridResult = validateGrid(value, q.validation, q.options?.rows || [], q.type);
+      if (
+        q.type === QUESTION_TYPES.MULTIPLE_CHOICE_GRID ||
+        q.type === QUESTION_TYPES.CHECKBOX_GRID
+      ) {
+        const gridResult = validateGrid(value, validationConfig, q.options?.rows || [], q.type);
         if (!gridResult.isValid) {
           allErrors[q.questionId] = gridResult.error;
         }
@@ -223,7 +354,8 @@ export function render(container, options = {}) {
     if (!isPreview) {
       const response = {
         formId: form.formId,
-        responseId: 'resp-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6),
+        responseId:
+          'resp-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6),
         submittedAt: new Date().toISOString(),
         startedAt: new Date(Date.now() - 60000).toISOString(),
         durationSeconds: 60,
@@ -255,22 +387,33 @@ export function render(container, options = {}) {
 
   function showConfirmation() {
     main.innerHTML = '';
-    const msg = form.metadata.confirmationMessage || 'Respons Anda telah tercatat.';
+    const msg = form.metadata.confirmationMessage || 'Jawaban Anda telah tercatat.';
     main.appendChild(ConfirmationPage.create(msg));
 
     if (!isPreview) {
       const anotherWrap = document.createElement('div');
-      anotherWrap.style.cssText = 'text-align:center;margin-top:4px;';
+      anotherWrap.style.cssText = 'text-align:center;margin-top:8px;display:flex;flex-direction:column;gap:8px;align-items:center;';
+      
       const another = document.createElement('a');
       another.href = '#';
       another.className = 'gf-another-link';
-      another.textContent = 'Kirim respons lain';
+      another.textContent = 'Kirim jawaban lain';
       another.addEventListener('click', (e) => {
         e.preventDefault();
         renderState.reset();
         render(container, { formId, isPreview });
       });
       anotherWrap.appendChild(another);
+
+      if (form.metadata.showSummaryToRespondents) {
+        const summaryLink = document.createElement('a');
+        summaryLink.href = `responses.html?formId=${formId}&readOnly=true`;
+        summaryLink.target = '_blank';
+        summaryLink.className = 'gf-another-link';
+        summaryLink.textContent = 'Lihat ringkasan jawaban';
+        anotherWrap.appendChild(summaryLink);
+      }
+
       main.appendChild(anotherWrap);
     }
   }
@@ -282,7 +425,9 @@ export function render(container, options = {}) {
       el.style.transition = 'background 1500ms ease';
       el.style.background = 'rgba(217,48,37,0.08)';
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => { el.style.background = ''; }, 1500);
+      setTimeout(() => {
+        el.style.background = '';
+      }, 1500);
       const firstInput = el.querySelector('input, textarea, select');
       if (firstInput) firstInput.focus({ preventScroll: true });
     }
@@ -310,10 +455,37 @@ function showClosed(container, msg) {
 }
 
 function getFormSections(form) {
-  if (form.sections.length === 0) {
-    return [{ sectionId: 'default', title: '', description: '', questionIds: form.questions.map((q) => q.questionId) }];
+  const hasSectionHeader = form.questions.some((q) => q.type === 'section_header');
+  if (!hasSectionHeader && form.sections && form.sections.length > 0) {
+    return form.sections;
   }
-  return form.sections;
+
+  const sections = [];
+  let currentSection = {
+    sectionId: 'default',
+    title: '',
+    description: '',
+    questionIds: [],
+  };
+
+  form.questions.forEach((q) => {
+    if (q.type === 'section_header') {
+      if (currentSection.questionIds.length > 0 || sections.length > 0) {
+        sections.push(currentSection);
+      }
+      currentSection = {
+        sectionId: q.questionId,
+        title: q.title || 'Tanpa Judul',
+        description: q.description || '',
+        questionIds: [],
+      };
+    } else {
+      currentSection.questionIds.push(q.questionId);
+    }
+  });
+
+  sections.push(currentSection);
+  return sections;
 }
 
 function generateRespondentId() {
@@ -322,7 +494,7 @@ function generateRespondentId() {
   let hash = 0;
   const s = ua + ts;
   for (let i = 0; i < s.length; i++) {
-    hash = ((hash << 5) - hash) + s.charCodeAt(i);
+    hash = (hash << 5) - hash + s.charCodeAt(i);
     hash |= 0;
   }
   return 'anon-' + Math.abs(hash).toString(36);
@@ -341,7 +513,10 @@ async function sendToWebhook(response, form) {
       if (attempt < 2) await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
     }
   }
-  console.warn('[FormRenderer] Webhook gagal setelah 3 percobaan, respons tetap tersimpan di lokal:', lastError);
+  console.warn(
+    '[FormRenderer] Webhook gagal setelah 3 percobaan, respons tetap tersimpan di lokal:',
+    lastError,
+  );
 }
 
 function applyPrefill(form, state, params) {
@@ -378,7 +553,10 @@ function trySessionRestore(formId, form, state) {
 function saveSession(formId, answers) {
   const sessionKey = `dfb_session_${formId}`;
   try {
-    sessionStorage.setItem(sessionKey, JSON.stringify({ answers, savedAt: new Date().toISOString() }));
+    sessionStorage.setItem(
+      sessionKey,
+      JSON.stringify({ answers, savedAt: new Date().toISOString() }),
+    );
   } catch (e) {
     console.warn('[FormRenderer] Gagal save session:', e);
   }

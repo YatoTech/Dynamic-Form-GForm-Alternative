@@ -7,18 +7,11 @@ export class LinearScaleEditor {
     const fieldset = document.createElement('div');
     fieldset.className = 'dfb-editor-fieldset';
 
-    const rangeWrapper = document.createElement('div');
-    rangeWrapper.className = 'dfb-editor-range-row';
-
-    const minField = document.createElement('label');
-    minField.className = 'dfb-editor-field';
-    const minSpan = document.createElement('span');
-    minSpan.className = 'dfb-editor-field-label';
-    minSpan.textContent = 'Nilai minimal';
-    minField.appendChild(minSpan);
+    const rangeRow = document.createElement('div');
+    rangeRow.className = 'dfb-editor-scale-range-row';
 
     const minSelect = document.createElement('select');
-    minSelect.className = 'dfb-editor-input';
+    minSelect.className = 'dfb-q-card-type-select dfb-editor-scale-select';
     const minValues = [0, 1];
     minValues.forEach((v) => {
       const opt = document.createElement('option');
@@ -27,22 +20,15 @@ export class LinearScaleEditor {
       if ((question.options?.minScale ?? 1) === v) opt.selected = true;
       minSelect.appendChild(opt);
     });
-    minSelect.addEventListener('change', () => {
-      if (!question.options) question.options = {};
-      question.options.minScale = Number(minSelect.value);
-    });
-    minField.appendChild(minSelect);
-    rangeWrapper.appendChild(minField);
+    rangeRow.appendChild(minSelect);
 
-    const maxField = document.createElement('label');
-    maxField.className = 'dfb-editor-field';
-    const maxSpan = document.createElement('span');
-    maxSpan.className = 'dfb-editor-field-label';
-    maxSpan.textContent = 'Nilai maksimal';
-    maxField.appendChild(maxSpan);
+    const keSpan = document.createElement('span');
+    keSpan.textContent = 'ke';
+    keSpan.className = 'dfb-editor-scale-to-text';
+    rangeRow.appendChild(keSpan);
 
     const maxSelect = document.createElement('select');
-    maxSelect.className = 'dfb-editor-input';
+    maxSelect.className = 'dfb-q-card-type-select dfb-editor-scale-select';
     const maxValues = [3, 4, 5, 6, 7, 8, 9, 10];
     maxValues.forEach((v) => {
       const opt = document.createElement('option');
@@ -51,43 +37,76 @@ export class LinearScaleEditor {
       if ((question.options?.maxScale ?? 5) === v) opt.selected = true;
       maxSelect.appendChild(opt);
     });
-    maxSelect.addEventListener('change', () => {
-      if (!question.options) question.options = {};
-      question.options.maxScale = Number(maxSelect.value);
-    });
-    maxField.appendChild(maxSelect);
-    rangeWrapper.appendChild(maxField);
+    rangeRow.appendChild(maxSelect);
 
-    fieldset.appendChild(rangeWrapper);
+    fieldset.appendChild(rangeRow);
 
-    const labelFields = [
-      { key: 'leftLabel', label: 'Label kiri (opsional)', placeholder: 'Sangat tidak setuju' },
-      { key: 'rightLabel', label: 'Label kanan (opsional)', placeholder: 'Sangat setuju' },
-    ];
+    const labelsContainer = document.createElement('div');
+    labelsContainer.className = 'dfb-editor-scale-labels-container';
 
-    labelFields.forEach(({ key, label, placeholder }) => {
-      const wrapper = document.createElement('label');
-      wrapper.className = 'dfb-editor-field';
+    // Left label row
+    const leftRow = document.createElement('div');
+    leftRow.className = 'dfb-editor-scale-label-row';
 
-      const span = document.createElement('span');
-      span.className = 'dfb-editor-field-label';
-      span.textContent = label;
-      wrapper.appendChild(span);
+    const leftNum = document.createElement('span');
+    leftNum.className = 'dfb-editor-scale-label-num';
+    leftNum.textContent = String(question.options?.minScale ?? 1);
+    leftRow.appendChild(leftNum);
 
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.className = 'dfb-editor-input';
-      input.placeholder = placeholder;
-      if (question.options?.[key]) input.value = question.options[key];
-      input.addEventListener('input', debounce(() => {
+    const leftInput = document.createElement('input');
+    leftInput.type = 'text';
+    leftInput.className = 'dfb-editor-choice-input dfb-editor-scale-label-input';
+    leftInput.placeholder = 'Label (opsional)';
+    leftInput.value = question.options?.leftLabel || '';
+    leftInput.addEventListener(
+      'input',
+      debounce(() => {
         if (!question.options) question.options = {};
-        question.options[key] = input.value;
-      }, 300));
-      wrapper.appendChild(input);
+        question.options.leftLabel = leftInput.value;
+      }, 300),
+    );
+    leftRow.appendChild(leftInput);
+    labelsContainer.appendChild(leftRow);
 
-      fieldset.appendChild(wrapper);
+    // Right label row
+    const rightRow = document.createElement('div');
+    rightRow.className = 'dfb-editor-scale-label-row';
+
+    const rightNum = document.createElement('span');
+    rightNum.className = 'dfb-editor-scale-label-num';
+    rightNum.textContent = String(question.options?.maxScale ?? 5);
+    rightRow.appendChild(rightNum);
+
+    const rightInput = document.createElement('input');
+    rightInput.type = 'text';
+    rightInput.className = 'dfb-editor-choice-input dfb-editor-scale-label-input';
+    rightInput.placeholder = 'Label (opsional)';
+    rightInput.value = question.options?.rightLabel || '';
+    rightInput.addEventListener(
+      'input',
+      debounce(() => {
+        if (!question.options) question.options = {};
+        question.options.rightLabel = rightInput.value;
+      }, 300),
+    );
+    rightRow.appendChild(rightInput);
+    labelsContainer.appendChild(rightRow);
+
+    fieldset.appendChild(labelsContainer);
+    container.appendChild(fieldset);
+
+    minSelect.addEventListener('change', () => {
+      const val = Number(minSelect.value);
+      if (!question.options) question.options = {};
+      question.options.minScale = val;
+      leftNum.textContent = String(val);
     });
 
-    container.appendChild(fieldset);
+    maxSelect.addEventListener('change', () => {
+      const val = Number(maxSelect.value);
+      if (!question.options) question.options = {};
+      question.options.maxScale = val;
+      rightNum.textContent = String(val);
+    });
   }
 }

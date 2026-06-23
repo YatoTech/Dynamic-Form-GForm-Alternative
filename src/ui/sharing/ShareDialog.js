@@ -1,5 +1,6 @@
 import { Modal } from '../common/Modal.js';
 import { Toast } from '../common/Toast.js';
+import { QRCodeGenerator } from './QRCodeGenerator.js';
 
 export class ShareDialog {
   static open(formId) {
@@ -17,7 +18,8 @@ export class ShareDialog {
       dialog.style.minWidth = '400px';
 
       const heading = document.createElement('h3');
-      heading.style.cssText = 'font-size:18px;font-weight:500;color:var(--dfb-text-primary,#202124);margin-bottom:16px;';
+      heading.style.cssText =
+        'font-size:18px;font-weight:500;color:var(--dfb-text-primary,#202124);margin-bottom:16px;';
       heading.textContent = 'Bagikan Formulir';
       dialog.appendChild(heading);
 
@@ -52,7 +54,8 @@ export class ShareDialog {
       dialog.appendChild(tabContent);
 
       const footer = document.createElement('p');
-      footer.style.cssText = 'font-size:11px;color:var(--dfb-text-secondary,#5F6368);margin-top:16px;text-align:center;';
+      footer.style.cssText =
+        'font-size:11px;color:var(--dfb-text-secondary,#5F6368);margin-top:16px;text-align:center;';
       footer.textContent = 'Form ini hanya dapat diakses di browser yang sama selama development.';
       dialog.appendChild(footer);
 
@@ -131,8 +134,6 @@ function renderEmbedTab(url) {
 }
 
 function renderQrTab(url) {
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
-
   const container = document.createElement('div');
   container.className = 'dfb-text-center';
 
@@ -141,23 +142,32 @@ function renderQrTab(url) {
   p.textContent = 'Scan QR Code untuk membuka formulir:';
   container.appendChild(p);
 
-  const img = document.createElement('img');
-  img.src = qrUrl;
-  img.alt = 'QR Code untuk form';
-  img.style.cssText = 'width:200px;height:200px;border-radius:8px;border:1px solid var(--dfb-border-color,#DADCE0);';
-  container.appendChild(img);
+  const qrBox = document.createElement('div');
+  qrBox.style.cssText =
+    'width:202px;height:202px;margin:0 auto;border-radius:8px;border:1px solid var(--dfb-border-color,#DADCE0);display:flex;align-items:center;justify-content:center;background:#fff;padding:8px;box-sizing:border-box;';
+  container.appendChild(qrBox);
 
   const btnContainer = document.createElement('div');
   btnContainer.className = 'dfb-mt-sm';
 
   const a = document.createElement('a');
-  a.href = qrUrl;
+  a.href = '#';
   a.download = 'form-qr.png';
   a.className = 'dfb-btn dfb-btn--primary';
   a.style.textDecoration = 'none';
+  a.style.display = 'none';
   a.textContent = 'Download QR Code';
   btnContainer.appendChild(a);
   container.appendChild(btnContainer);
+
+  QRCodeGenerator.render(url, qrBox)
+    .then((dataUrl) => {
+      if (dataUrl) {
+        a.href = dataUrl;
+        a.style.display = 'inline-block';
+      }
+    })
+    .catch(() => {});
 
   return container;
 }

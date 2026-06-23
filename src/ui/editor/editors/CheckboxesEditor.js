@@ -20,9 +20,13 @@ export class CheckboxesEditor {
       const row = document.createElement('div');
       row.className = 'dfb-editor-choice-row';
 
-      const box = document.createElement('span');
-      box.textContent = '\u2610';
-      box.style.cssText = 'color:var(--dfb-text-secondary,#5F6368);font-size:14px;';
+      const dragHandle = document.createElement('span');
+      dragHandle.className = 'dfb-choice-drag-handle';
+      dragHandle.innerHTML = '&#8286;';
+      row.appendChild(dragHandle);
+
+      const box = document.createElement('div');
+      box.className = 'dfb-editor-choice-indicator dfb-editor-choice-indicator--checkbox';
       row.appendChild(box);
 
       const input = document.createElement('input');
@@ -30,11 +34,14 @@ export class CheckboxesEditor {
       input.className = 'dfb-editor-input dfb-editor-choice-input';
       input.value = choice;
       input.placeholder = `Opsi ${i + 1}`;
-      input.addEventListener('input', debounce(() => {
-        if (!question.options) question.options = {};
-        if (!question.options.choices) question.options.choices = [];
-        question.options.choices[i] = input.value;
-      }, 300));
+      input.addEventListener(
+        'input',
+        debounce(() => {
+          if (!question.options) question.options = {};
+          if (!question.options.choices) question.options.choices = [];
+          question.options.choices[i] = input.value;
+        }, 300),
+      );
       row.appendChild(input);
 
       if (choices.length > 1) {
@@ -51,76 +58,75 @@ export class CheckboxesEditor {
       choicesWrapper.appendChild(row);
     });
 
+    // If "Other" option is included, show it
+    if (question.options?.includeOther) {
+      const otherRow = document.createElement('div');
+      otherRow.className = 'dfb-editor-choice-row dfb-editor-choice-other-row';
+
+      const otherIndicator = document.createElement('div');
+      otherIndicator.className =
+        'dfb-editor-choice-indicator dfb-editor-choice-indicator--checkbox';
+      otherRow.appendChild(otherIndicator);
+
+      const otherInput = document.createElement('input');
+      otherInput.type = 'text';
+      otherInput.className = 'dfb-editor-input dfb-editor-choice-input';
+      otherInput.value = 'Lainnya...';
+      otherInput.disabled = true;
+      otherInput.style.fontStyle = 'italic';
+      otherRow.appendChild(otherInput);
+
+      const removeOtherBtn = document.createElement('button');
+      removeOtherBtn.className = 'dfb-editor-choice-remove';
+      removeOtherBtn.textContent = '\u00D7';
+      removeOtherBtn.addEventListener('click', () => {
+        question.options.includeOther = false;
+        renderChoices();
+      });
+      otherRow.appendChild(removeOtherBtn);
+
+      choicesWrapper.appendChild(otherRow);
+    }
+
+    // Inline Add Option Row
+    const addRow = document.createElement('div');
+    addRow.className = 'dfb-editor-choice-row dfb-editor-choice-add-row';
+
+    const addIndicator = document.createElement('div');
+    addIndicator.className = 'dfb-editor-choice-indicator dfb-editor-choice-indicator--checkbox';
+    addIndicator.style.opacity = '0.5';
+    addRow.appendChild(addIndicator);
+
     const addBtn = document.createElement('button');
-    addBtn.className = 'dfb-btn dfb-btn--ghost dfb-btn--sm';
-    addBtn.textContent = '+ Tambah opsi';
+    addBtn.className = 'dfb-btn-add-option-inline';
+    addBtn.textContent = 'Tambahkan opsi';
     addBtn.addEventListener('click', () => {
       if (!question.options) question.options = {};
       if (!question.options.choices) question.options.choices = [];
       question.options.choices.push(`Opsi ${question.options.choices.length + 1}`);
       renderChoices();
     });
-    choicesWrapper.appendChild(addBtn);
+    addRow.appendChild(addBtn);
 
-    const otherLabel = document.createElement('label');
-    otherLabel.className = 'dfb-editor-field dfb-editor-check-row';
+    if (!question.options?.includeOther) {
+      const orSpan = document.createElement('span');
+      orSpan.textContent = ' atau ';
+      orSpan.style.cssText = 'font-size: 13px; color: var(--dfb-text-secondary); margin: 0 4px;';
+      addRow.appendChild(orSpan);
 
-    const otherCheck = document.createElement('input');
-    otherCheck.type = 'checkbox';
-    otherCheck.checked = question.options?.includeOther || false;
-    otherCheck.addEventListener('change', () => {
-      if (!question.options) question.options = {};
-      question.options.includeOther = otherCheck.checked;
-    });
-    otherLabel.appendChild(otherCheck);
-
-    const otherSpan = document.createElement('span');
-    otherSpan.textContent = ' Tambah opsi "Lainnya"';
-    otherLabel.appendChild(otherSpan);
-
-    choicesWrapper.appendChild(otherLabel);
-
-    const selectWrapper = document.createElement('div');
-    selectWrapper.className = 'dfb-editor-select-group';
-
-    const minField = document.createElement('label');
-    minField.className = 'dfb-editor-field';
-    const minSpan = document.createElement('span');
-    minSpan.className = 'dfb-editor-field-label';
-    minSpan.textContent = 'Min. pilihan';
-    minField.appendChild(minSpan);
-    const minInput = document.createElement('input');
-    minInput.type = 'number';
-    minInput.className = 'dfb-editor-input';
-    minInput.placeholder = 'Tidak ada';
-    if (question.options?.minSelect != null) minInput.value = question.options.minSelect;
-    minInput.addEventListener('input', debounce(() => {
-      if (!question.options) question.options = {};
-      question.options.minSelect = minInput.value ? Number(minInput.value) : null;
-    }, 300));
-    minField.appendChild(minInput);
-    selectWrapper.appendChild(minField);
-
-    const maxField = document.createElement('label');
-    maxField.className = 'dfb-editor-field';
-    const maxSpan = document.createElement('span');
-    maxSpan.className = 'dfb-editor-field-label';
-    maxSpan.textContent = 'Maks. pilihan';
-    maxField.appendChild(maxSpan);
-    const maxInput = document.createElement('input');
-    maxInput.type = 'number';
-    maxInput.className = 'dfb-editor-input';
-    maxInput.placeholder = 'Tidak ada';
-    if (question.options?.maxSelect != null) maxInput.value = question.options.maxSelect;
-    maxInput.addEventListener('input', debounce(() => {
-      if (!question.options) question.options = {};
-      question.options.maxSelect = maxInput.value ? Number(maxInput.value) : null;
-    }, 300));
-    maxField.appendChild(maxInput);
-    selectWrapper.appendChild(maxField);
+      const addOtherBtn = document.createElement('button');
+      addOtherBtn.className = 'dfb-btn-add-other-inline';
+      addOtherBtn.textContent = 'tambahkan "Lainnya"';
+      addOtherBtn.addEventListener('click', () => {
+        if (!question.options) question.options = {};
+        question.options.includeOther = true;
+        renderChoices();
+      });
+      addRow.appendChild(addOtherBtn);
+    }
+    choicesWrapper.appendChild(addRow);
 
     fieldset.appendChild(choicesWrapper);
-    fieldset.appendChild(selectWrapper);
     container.appendChild(fieldset);
 
     function renderChoices() {

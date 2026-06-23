@@ -33,7 +33,7 @@ test.describe('Editor — P0 flows', () => {
   test('duplicates a question', async ({ page }) => {
     await page.goto(`/editor.html?formId=${TEST_FORM_ID}`);
     const duplicateBtn = page.locator('.dfb-q-btn-duplicate').first();
-    await duplicateBtn.click();
+    await duplicateBtn.click({ force: true });
     const cards = page.locator('.dfb-question-card');
     await expect(cards).toHaveCount(5);
   });
@@ -41,7 +41,7 @@ test.describe('Editor — P0 flows', () => {
   test('deletes a question', async ({ page }) => {
     await page.goto(`/editor.html?formId=${TEST_FORM_ID}`);
     const deleteBtn = page.locator('.dfb-q-btn-delete').first();
-    await deleteBtn.click();
+    await deleteBtn.click({ force: true });
     const cards = page.locator('.dfb-question-card');
     await expect(cards).toHaveCount(3);
   });

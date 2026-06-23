@@ -22,7 +22,8 @@ export class DragHandler {
   #createDropIndicator() {
     this.#dropIndicator = document.createElement('div');
     this.#dropIndicator.className = 'dfb-drop-indicator';
-    this.#dropIndicator.style.cssText = 'height:3px;background:var(--dfb-primary-color,#4285F4);border-radius:2px;margin:4px 0;display:none;';
+    this.#dropIndicator.style.cssText =
+      'height:3px;background:var(--dfb-primary-color,#4285F4);border-radius:2px;margin:4px 0;display:none;';
     this.#listEl.parentNode.insertBefore(this.#dropIndicator, this.#listEl.nextSibling);
   }
 

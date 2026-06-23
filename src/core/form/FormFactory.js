@@ -31,23 +31,53 @@ export class FormFactory {
    * @param {FormDefinition} form
    * @param {string} type
    * @param {string} [sectionId]
+   * @param {string|null} [afterQuestionId]
    * @returns {Question}
    */
-  static addQuestion(form, type, sectionId) {
-    const order = form.questions.length;
+  static addQuestion(form, type, sectionId, afterQuestionId = null) {
     const options = {};
     if (type === 'mc_grid' || type === 'checkbox_grid') {
       options.rows = ['Baris 1'];
       options.columns = ['Kolom 1', 'Kolom 2'];
     }
-    const question = new Question(type, { order, options });
-    form.questions.push(question);
-    const targetSection = sectionId
-      ? form.sections.find((s) => s.sectionId === sectionId)
-      : form.sections[form.sections.length - 1];
-    if (targetSection) {
-      targetSection.questionIds.push(question.questionId);
+    const question = new Question(type, { order: 0, options });
+
+    let targetIndex = form.questions.length;
+    if (afterQuestionId) {
+      const idx = form.questions.findIndex((q) => q.questionId === afterQuestionId);
+      if (idx !== -1) {
+        targetIndex = idx + 1;
+      }
     }
+
+    form.questions.splice(targetIndex, 0, question);
+    form.questions.forEach((q, i) => {
+      q.order = i;
+    });
+
+    let targetSection = null;
+    if (sectionId) {
+      targetSection = form.sections.find((s) => s.sectionId === sectionId);
+    } else {
+      if (afterQuestionId) {
+        targetSection = form.sections.find((s) => s.questionIds.includes(afterQuestionId));
+      }
+      if (!targetSection) {
+        targetSection = form.sections[form.sections.length - 1];
+      }
+    }
+
+    if (targetSection) {
+      let qIdx = targetSection.questionIds.length;
+      if (afterQuestionId) {
+        const idx = targetSection.questionIds.indexOf(afterQuestionId);
+        if (idx !== -1) {
+          qIdx = idx + 1;
+        }
+      }
+      targetSection.questionIds.splice(qIdx, 0, question.questionId);
+    }
+
     form.metadata.updatedAt = new Date().toISOString();
     return question;
   }
@@ -72,20 +102,28 @@ export class FormFactory {
    * @returns {Question|null}
    */
   static duplicateQuestion(form, questionId) {
-    const source = form.questions.find((q) => q.questionId === questionId);
-    if (!source) return null;
+    const sourceIndex = form.questions.findIndex((q) => q.questionId === questionId);
+    if (sourceIndex === -1) return null;
+    const source = form.questions[sourceIndex];
     const clone = new Question(source.type, {
       ...source.toJSON(),
       questionId: undefined,
-      order: form.questions.length,
+      order: sourceIndex + 1,
       title: source.title ? `${source.title} (Salinan)` : '',
     });
-    form.questions.push(clone);
+
+    form.questions.splice(sourceIndex + 1, 0, clone);
+    form.questions.forEach((q, i) => {
+      q.order = i;
+    });
+
     form.sections.forEach((s) => {
-      if (s.questionIds.includes(questionId)) {
-        s.questionIds.push(clone.questionId);
+      const idx = s.questionIds.indexOf(questionId);
+      if (idx !== -1) {
+        s.questionIds.splice(idx + 1, 0, clone.questionId);
       }
     });
+
     form.metadata.updatedAt = new Date().toISOString();
     return clone;
   }

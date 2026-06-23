@@ -8,8 +8,14 @@ import { DateField } from './questions/DateField.js';
 import { TimeField } from './questions/TimeField.js';
 import { McGridField } from './questions/McGridField.js';
 import { CheckboxGridField } from './questions/CheckboxGridField.js';
+import { FileUploadField } from './questions/FileUploadField.js';
+import { RatingField } from './questions/RatingField.js';
 import { QUESTION_TYPES } from '../../core/form/QuestionTypes.js';
-import { validateField, validateChoices, validateGrid } from '../../core/engine/ValidationEngine.js';
+import {
+  validateField,
+  validateChoices,
+  validateGrid,
+} from '../../core/engine/ValidationEngine.js';
 
 const FIELD_MAP = {
   [QUESTION_TYPES.SHORT_ANSWER]: ShortAnswerField,
@@ -22,6 +28,8 @@ const FIELD_MAP = {
   [QUESTION_TYPES.TIME]: TimeField,
   [QUESTION_TYPES.MULTIPLE_CHOICE_GRID]: McGridField,
   [QUESTION_TYPES.CHECKBOX_GRID]: CheckboxGridField,
+  [QUESTION_TYPES.FILE_UPLOAD]: FileUploadField,
+  [QUESTION_TYPES.RATING]: RatingField,
 };
 
 export class SectionView {
@@ -72,13 +80,29 @@ export class SectionView {
         card.appendChild(desc);
       }
 
+      if (q.imageUrl) {
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'gf-question-image-container';
+        imgContainer.style.cssText = 'margin: 12px 0; max-width: 100%;';
+        const img = document.createElement('img');
+        img.src = q.imageUrl;
+        img.style.cssText = 'max-width: 100%; max-height: 350px; border-radius: 8px; object-fit: contain; border: 1px solid var(--dfb-border-color,#dadce0);';
+        img.alt = q.title || 'Gambar Pertanyaan';
+        imgContainer.appendChild(img);
+        card.appendChild(imgContainer);
+      }
+
       const fieldWrapper = document.createElement('div');
       fieldWrapper.dataset.qid = q.questionId;
       card.appendChild(fieldWrapper);
 
       const FieldClass = FIELD_MAP[q.type];
       if (FieldClass) {
-        const fieldEl = FieldClass.create(q, answers[q.questionId]?.value ?? '', !!errors[q.questionId]);
+        const fieldEl = FieldClass.create(
+          q,
+          answers[q.questionId]?.value ?? '',
+          !!errors[q.questionId],
+        );
         fieldWrapper.appendChild(fieldEl);
       }
 
@@ -112,18 +136,22 @@ export class SectionView {
       const wrapper = sectionEl.querySelector(`[data-qid="${q.questionId}"]`);
       if (!wrapper) return;
       const value = collectFieldValue(wrapper, q);
-      const result = validateField(value, q.validation);
+      const validationConfig = Object.assign({ required: q.required }, q.validation);
+      const result = validateField(value, validationConfig);
       if (!result.isValid) {
         errors[q.questionId] = result.error;
       }
       if (Array.isArray(value) && q.validation?.minSelect != null) {
-        const choiceResult = validateChoices(value, q.validation);
+        const choiceResult = validateChoices(value, validationConfig);
         if (!choiceResult.isValid) {
           errors[q.questionId] = choiceResult.error;
         }
       }
-      if (q.type === QUESTION_TYPES.MULTIPLE_CHOICE_GRID || q.type === QUESTION_TYPES.CHECKBOX_GRID) {
-        const gridResult = validateGrid(value, q.validation, q.options?.rows || [], q.type);
+      if (
+        q.type === QUESTION_TYPES.MULTIPLE_CHOICE_GRID ||
+        q.type === QUESTION_TYPES.CHECKBOX_GRID
+      ) {
+        const gridResult = validateGrid(value, validationConfig, q.options?.rows || [], q.type);
         if (!gridResult.isValid) {
           errors[q.questionId] = gridResult.error;
         }
@@ -185,7 +213,9 @@ function collectFieldValue(wrapper, q) {
       const rows = q.options?.rows || [];
       const result = {};
       rows.forEach((_, ri) => {
-        const checked = wrapper.querySelector(`.gf-grid-radio-input[name="q-${q.questionId}_r${ri}"]:checked`);
+        const checked = wrapper.querySelector(
+          `.gf-grid-radio-input[name="q-${q.questionId}_r${ri}"]:checked`,
+        );
         if (checked) result[String(ri)] = checked.value;
       });
       return result;
@@ -194,12 +224,29 @@ function collectFieldValue(wrapper, q) {
       const rows = q.options?.rows || [];
       const result = {};
       rows.forEach((_, ri) => {
-        const rowInputs = wrapper.querySelectorAll(`.gf-grid-checkbox-input[name="q-${q.questionId}_r${ri}[]"]:checked`);
+        const rowInputs = wrapper.querySelectorAll(
+          `.gf-grid-checkbox-input[name="q-${q.questionId}_r${ri}[]"]:checked`,
+        );
         const vals = [];
         rowInputs.forEach((cb) => vals.push(cb.value));
         if (vals.length > 0) result[String(ri)] = vals;
       });
       return result;
+    }
+    case QUESTION_TYPES.RATING: {
+      const input = wrapper.querySelector('.gf-input-rating');
+      return input ? input.value : '';
+    }
+    case QUESTION_TYPES.FILE_UPLOAD: {
+      const input = wrapper.querySelector('.gf-input-file-data');
+      if (input && input.value) {
+        try {
+          return JSON.parse(input.value);
+        } catch {
+          return null;
+        }
+      }
+      return null;
     }
     default:
       return '';

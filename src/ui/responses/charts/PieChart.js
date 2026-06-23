@@ -2,7 +2,16 @@
  * PieChart — SVG-based pie chart, zero dependencies.
  */
 
-const COLORS = ['#4285F4', '#EA4335', '#FBBC04', '#34A853', '#FF6D01', '#46BDC6', '#AB47BC', '#7B1FA2'];
+const COLORS = [
+  '#4285F4',
+  '#EA4335',
+  '#FBBC04',
+  '#34A853',
+  '#FF6D01',
+  '#46BDC6',
+  '#AB47BC',
+  '#7B1FA2',
+];
 
 export class PieChart {
   /**
@@ -25,7 +34,14 @@ export class PieChart {
       const angle = pct * 360;
       const startAngle = cumulative;
       cumulative += angle;
-      return { label: d.label, count: d.count, pct, startAngle, angle, color: COLORS[i % COLORS.length] };
+      return {
+        label: d.label,
+        count: d.count,
+        pct,
+        startAngle,
+        angle,
+        color: COLORS[i % COLORS.length],
+      };
     });
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');

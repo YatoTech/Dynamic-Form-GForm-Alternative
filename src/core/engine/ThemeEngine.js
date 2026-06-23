@@ -10,6 +10,11 @@ const PRESET_THEMES = [
   { name: 'Blueberry', primaryColor: '#3949AB', backgroundColor: '#E8EAF6' },
   { name: 'Sage', primaryColor: '#558B2F', backgroundColor: '#F1F8E9' },
   { name: 'Spearmint', primaryColor: '#00897B', backgroundColor: '#E0F2F1' },
+  { name: 'Sunset', primaryColor: '#E65100', backgroundColor: '#FFF3E0' },
+  { name: 'Ocean', primaryColor: '#0288D1', backgroundColor: '#E1F5FE' },
+  { name: 'Forest', primaryColor: '#2E7D32', backgroundColor: '#E8F5E9' },
+  { name: 'Night', primaryColor: '#37474F', backgroundColor: '#ECEFF1' },
+  { name: 'Grape', primaryColor: '#7B1FA2', backgroundColor: '#F3E5F5' },
 ];
 
 export { PRESET_THEMES };
@@ -34,12 +39,16 @@ export function applyTheme(themeConfig) {
   }
   if (themeConfig.fontFamily) {
     const fontMap = {
-      'Sans Serif': "'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-      'Serif': 'Georgia, "Times New Roman", serif',
-      'Monospace': "'Courier New', Courier, monospace",
-      'Decorative': "'Comic Sans MS', cursive, sans-serif",
+      'Sans Serif':
+        "'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      Serif: 'Georgia, "Times New Roman", serif',
+      Monospace: "'Courier New', Courier, monospace",
+      Decorative: "'Comic Sans MS', cursive, sans-serif",
     };
-    root.style.setProperty('--dfb-font-family', fontMap[themeConfig.fontFamily] || fontMap['Sans Serif']);
+    root.style.setProperty(
+      '--dfb-font-family',
+      fontMap[themeConfig.fontFamily] || fontMap['Sans Serif'],
+    );
   }
   if (themeConfig.fontSize) {
     const sizeMap = { small: '13px', medium: '14px', large: '16px' };

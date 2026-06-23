@@ -1,9 +1,9 @@
 import { sanitizeText } from '../../core/utils/sanitize.js';
 
 export class SectionDivider {
-  static create(question, number, handlers = {}) {
+  static create(question, number, handlers = {}, isActive = false) {
     const div = document.createElement('div');
-    div.className = 'dfb-section-divider';
+    div.className = 'dfb-section-divider' + (isActive ? ' dfb-section-divider--active' : '');
     div.dataset.dfbQuestionId = question.questionId;
 
     const header = document.createElement('div');
@@ -11,7 +11,12 @@ export class SectionDivider {
 
     const dragHandle = document.createElement('span');
     dragHandle.className = 'dfb-drag-handle';
-    dragHandle.textContent = '\u22EE';
+    dragHandle.innerHTML = `
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+        <circle cx="8" cy="8" r="1.5"/><circle cx="12" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/>
+        <circle cx="8" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/>
+      </svg>
+    `;
     header.appendChild(dragHandle);
 
     const body = document.createElement('div');
@@ -28,6 +33,9 @@ export class SectionDivider {
     titleInput.value = question.title;
     titleInput.placeholder = 'Judul Seksi';
     titleInput.maxLength = 200;
+    if (!isActive) {
+      titleInput.disabled = true;
+    }
     body.appendChild(titleInput);
 
     const descInput = document.createElement('input');
@@ -37,6 +45,9 @@ export class SectionDivider {
     descInput.placeholder = 'Deskripsi seksi (opsional)';
     descInput.maxLength = 500;
     descInput.hidden = !question.description;
+    if (!isActive) {
+      descInput.disabled = true;
+    }
     body.appendChild(descInput);
 
     header.appendChild(body);
@@ -101,6 +112,7 @@ export class SectionDivider {
 
     titleInput.addEventListener('blur', () => {
       question.title = sanitizeText(titleInput.value);
+      if (handlers.onSave) handlers.onSave();
     });
 
     descInput.addEventListener('blur', () => {
@@ -108,6 +120,15 @@ export class SectionDivider {
       if (!question.description) descInput.hidden = true;
       if (handlers.onSave) handlers.onSave();
     });
+
+    // Activating card when clicked (if currently inactive)
+    if (!isActive) {
+      div.addEventListener('click', (e) => {
+        if (!e.target.closest('.dfb-drag-handle') && !e.target.closest('button')) {
+          handlers.onEdit?.(question.questionId);
+        }
+      });
+    }
 
     return div;
   }

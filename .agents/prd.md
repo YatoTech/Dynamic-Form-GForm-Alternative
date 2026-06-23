@@ -1,7 +1,9 @@
 # Dynamic Form Builder — Product Requirements Document
 
-> **Versi:** 1.0.0 | **Tanggal:** 2026-06-22 | **Status:** Final Draft  
-> **Penulis:** AI-assisted PRD | **Dokumen Terkait:** `design.md`
+> **Versi:** 1.1.0 | **Terakhir diperbarui:** 2026-06-23 | **Status:** Living Document — Active Development
+> **Penulis:** AI-assisted PRD | **Dokumen Terkait:** `AGENTS.md`, `audit_report.md`
+>
+> **🎯 Tujuan Utama:** Membuat clone Google Forms **1:1** yang berjalan 100% di sisi klien (client-side), tanpa dependensi eksternal wajib, dan dapat di-self-host siapapun. Target parity: **≥ 95%** kesetaraan fitur, behavior, dan tampilan dengan Google Forms versi **Juni 2026**.
 
 ---
 
@@ -22,7 +24,10 @@
 
 ### 1.1 Ringkasan Produk
 
-**Dynamic Form Builder** adalah aplikasi pembuat formulir dinamis berbasis JavaScript murni (Vanilla JS) yang mereplikasi fungsionalitas inti Google Forms secara 1:1. Aplikasi ini dirancang sebagai solusi **client-side first**, ringan, dan **self-hostable** — memungkinkan siapa pun membuat, mendistribusikan, dan mengelola formulir web tanpa bergantung pada layanan pihak ketiga.
+**Dynamic Form Builder** adalah aplikasi pembuat formulir dinamis berbasis JavaScript murni (Vanilla JS) yang mereplikasi fungsionalitas Google Forms secara **1:1** — termasuk semua fitur terbaru hingga Juni 2026. Aplikasi ini dirancang sebagai solusi **client-side first**, ringan, dan **self-hostable** — memungkinkan siapa pun membuat, mendistribusikan, dan mengelola formulir web tanpa bergantung pada layanan pihak ketiga.
+
+> [!IMPORTANT]
+> **Definisi "1:1 Parity":** Setiap fitur, behavior, dan elemen UI yang ada di Google Forms versi Juni 2026 HARUS ada di Dynamic Form Builder dengan fungsi yang identik. Fitur yang tidak ada di Google Forms boleh ditambahkan sebagai bonus (e.g., webhook, Rating type), namun TIDAK BOLEH mengorbankan parity fitur utama.
 
 ### 1.2 Masalah yang Diselesaikan
 
@@ -36,25 +41,27 @@
 
 ### 1.3 Proposisi Nilai Unik
 
+- **Google Forms Clone 1:1** — fitur, tampilan, dan behavior identik dengan Google Forms Juni 2026
 - **Zero-dependency core** — berjalan tanpa framework atau library eksternal wajib
 - **Embeddable by default** — satu baris script untuk menyisipkan form ke halaman web manapun
-- **Data sovereignty** — pengguna memiliki kendali penuh atas tujuan penyimpanan data respons (localStorage, webhook, Supabase, Google Sheets)
+- **Data sovereignty** — pengguna memiliki kendali penuh atas tujuan penyimpanan data respons
 - **Deploy dalam 5 menit** — tanpa konfigurasi server, database, atau akun pihak ketiga
 - **Target bundle < 150 KB gzipped** — performa setara native di jaringan 4G
 
 ### 1.4 Visi Produk
 
-> *"Sebuah form builder yang bisa di-deploy dalam 5 menit, berjalan di browser tanpa dependency eksternal wajib, dan memberikan pengalaman yang identik dengan Google Forms dari sisi pembuat maupun pengisi formulir."*
+> *"Clone Google Forms yang sempurna — berjalan 100% di browser tanpa akun Google, tanpa dependency eksternal wajib, dengan pengalaman yang tidak bisa dibedakan dari Google Forms asli."*
 
 ### 1.5 Prinsip Desain
 
 | Prinsip | Penjelasan |
 |---------|-----------|
-| **Parity First** | Setiap fitur Google Forms harus ada dan berperilaku identik |
+| **Parity First** | Setiap fitur Google Forms HARUS ada dan berperilaku identik — tidak ada pengecualian |
 | **Zero Dependency Core** | Core engine berjalan tanpa framework eksternal |
 | **Progressive Enhancement** | Form tetap readable tanpa JavaScript; kaya fitur dengan JavaScript aktif |
 | **Data Sovereignty** | Pengguna menentukan ke mana data respons dikirim |
 | **Embeddable by Default** | Bisa ditanamkan ke halaman manapun tanpa konflik CSS/JS |
+| **Always Up-to-Date** | Mengikuti pembaruan Google Forms — audit ulang setiap 3 bulan |
 
 ---
 
@@ -62,13 +69,14 @@
 
 ### 2.1 Tujuan Utama
 
-| # | Objective | Deskripsi |
-|---|-----------|-----------|
-| O1 | **Feature Parity dengan Google Forms** | Mereplikasi 11 tipe pertanyaan, conditional logic, tema visual, dan alur pengisian yang identik |
-| O2 | **Kemudahan Deployment** | Aplikasi dapat di-deploy dan digunakan dalam waktu < 5 menit tanpa setup server |
-| O3 | **Performa Optimal** | Bundle < 150 KB gzipped, TTI < 2 detik pada jaringan 4G |
-| O4 | **Aksesibilitas Universal** | Dapat digunakan tanpa akun, tanpa login, dan memenuhi standar WCAG 2.1 Level AA |
-| O5 | **Embeddability** | Form dapat di-embed ke halaman web manapun via iframe, Web Component, atau JavaScript API |
+| # | Objective | Deskripsi | Target |
+|---|-----------|-----------|--------|
+| O1 | **1:1 Parity dengan Google Forms Juni 2026** | Mereplikasi SEMUA 12 tipe pertanyaan, fitur baru 2026 (Response Cap, Closing Date), conditional logic, tema visual, opsi "Lainnya", header image, dan alur pengisian yang identik | ≥ 95% parity score |
+| O2 | **Kemudahan Deployment** | Aplikasi dapat di-deploy dan digunakan dalam waktu < 5 menit tanpa setup server | < 5 menit dari download ke use |
+| O3 | **Performa Optimal** | Bundle < 150 KB gzipped, TTI < 2 detik pada jaringan 4G | Lighthouse ≥ 90 |
+| O4 | **Aksesibilitas Universal** | Dapat digunakan tanpa akun, tanpa login, dan memenuhi standar WCAG 2.1 Level AA | Lighthouse a11y ≥ 90 |
+| O5 | **Embeddability** | Form dapat di-embed ke halaman web manapun via iframe, Web Component, atau JavaScript API | Berjalan di Chrome/FF/Safari/Edge |
+| O6 | **Client-side Only** | Semua fitur berfungsi TANPA server/backend, termasuk fitur baru 2026 | 100% offline capable |
 
 ### 2.2 Key Performance Indicators (KPI)
 
@@ -577,21 +585,24 @@ Dynamic Form Builder
 
 **Tipe Pertanyaan yang Didukung:**
 
-| ID | Tipe Pertanyaan | Deskripsi | Google Forms Parity | Prioritas |
-|----|----------------|-----------|:-------------------:|:---------:|
-| QT-01 | Short Answer | Input teks satu baris | ✅ | P0 |
-| QT-02 | Paragraph | Textarea multi-baris | ✅ | P0 |
-| QT-03 | Multiple Choice | Pilihan radio (satu jawaban) | ✅ | P0 |
-| QT-04 | Checkboxes | Pilihan checkbox (multi-jawaban) | ✅ | P0 |
-| QT-05 | Dropdown | Select menu dropdown | ✅ | P0 |
-| QT-06 | Linear Scale | Skala numerik (mis. 1–5, 1–10) | ✅ | P0 |
-| QT-07 | Multiple Choice Grid | Grid baris × kolom, satu per baris | ✅ | P1 |
-| QT-08 | Checkbox Grid | Grid baris × kolom, multi per baris | ✅ | P1 |
-| QT-09 | Date | Date picker | ✅ | P0 |
-| QT-10 | Time | Time picker | ✅ | P0 |
-| QT-11 | File Upload | Upload file (disimpan lokal/remote) | ✅ | P2 |
-| QT-12 | Section Header | Pembatas antar seksi (bukan pertanyaan) | ✅ | P0 |
-| QT-13 | Rating (Bintang) | Skala bintang 1–5 atau 1–10 | ❌ (ekstensi) | P2 |
+| ID | Tipe Pertanyaan | Deskripsi | Google Forms Parity | Status | Prioritas |
+|----|----------------|-----------|:-------------------:|:------:|:---------:|
+| QT-01 | Short Answer | Input teks satu baris | ✅ | ✅ Selesai | P0 |
+| QT-02 | Paragraph | Textarea multi-baris | ✅ | ✅ Selesai | P0 |
+| QT-03 | Multiple Choice | Pilihan radio + opsi "Lainnya" | ✅ | ⚠️ Perlu opsi Lainnya | P0 |
+| QT-04 | Checkboxes | Pilihan checkbox + opsi "Lainnya" | ✅ | ⚠️ Perlu opsi Lainnya | P0 |
+| QT-05 | Dropdown | Select menu dropdown | ✅ | ✅ Selesai | P0 |
+| QT-06 | Linear Scale | Skala numerik (mis. 1–5, 1–10) | ✅ | ✅ Selesai | P0 |
+| QT-07 | Multiple Choice Grid | Grid baris × kolom, satu per baris | ✅ | ✅ Selesai | P1 |
+| QT-08 | Checkbox Grid | Grid baris × kolom, multi per baris | ✅ | ✅ Selesai | P1 |
+| QT-09 | Date | Date picker dengan validasi min/max | ✅ | ✅ Selesai | P0 |
+| QT-10 | Time | Time picker dengan validasi | ✅ | ✅ Selesai | P0 |
+| QT-11 | File Upload | Upload file (disimpan lokal/remote) | ✅ | ✅ Selesai | P2 |
+| QT-12 | Section Header | Pembatas antar seksi/halaman | ✅ | ✅ Selesai | P0 |
+| QT-13 | Rating (Bintang) | Skala bintang 1–5 atau 1–10 | ❌ (ekstensi DFB) | ✅ Bonus | P2 |
+
+> [!NOTE]
+> **Opsi "Lainnya" (Other)** di QT-03 dan QT-04 adalah fitur native Google Forms yang WAJIB ada. Saat dipilih, muncul text input bebas di samping pilihan "Lainnya...". Implementasi: lihat task E1-01 s/d E1-04.
 
 ---
 
@@ -887,17 +898,18 @@ resp-002,2026-06-22T11:15:00Z,85,Siti Rahayu,siti@email.com,5
 
 > Sebagai **pembuat form**, saya ingin **mengubah warna, font, dan tampilan visual form**, sehingga **form sesuai dengan identitas brand organisasi saya**.
 
-| # | Acceptance Criteria | Prioritas |
-|---|-------------------|:---------:|
-| AC-1 | Tema default: putih dengan aksen biru `#4285F4` (identik Google Forms) | P0 |
-| AC-2 | Color picker untuk mengubah warna header | P0 |
-| AC-3 | Color picker untuk mengubah warna background form | P0 |
-| AC-4 | Font selector: minimal 4 pilihan (Sans Serif, Serif, Monospace, Decorative) | P0 |
-| AC-5 | Perubahan tema terefleksi secara **real-time** di preview editor | P0 |
-| AC-6 | Upload/URL gambar header form | P1 |
-| AC-7 | Minimal 6 preset tema siap pakai dengan thumbnail preview | P1 |
-| AC-8 | Klik preset langsung menerapkan tema; tema aktif memiliki indikator terpilih | P1 |
-| AC-9 | Konfigurasi tema tersimpan sebagai bagian dari form definition JSON | P0 |
+| # | Acceptance Criteria | Status | Prioritas |
+|---|-------------------|:------:|:---------:|
+| AC-1 | Tema default: putih dengan aksen biru `#4285F4` (identik Google Forms) | ✅ | P0 |
+| AC-2 | Color picker untuk mengubah warna header | ✅ | P0 |
+| AC-3 | Color picker untuk mengubah warna background form | ✅ | P0 |
+| AC-4 | Font selector: minimal 4 pilihan (Sans Serif, Serif, Monospace, Decorative) | ✅ | P0 |
+| AC-5 | Perubahan tema terefleksi secara **real-time** di preview editor | ✅ | P0 |
+| AC-6 | Upload/set gambar header form (base64 atau URL) dan render di renderer | ⚠️ P | P0 |
+| AC-7 | Minimal 6 preset tema siap pakai dengan thumbnail preview | ✅ | P1 |
+| AC-8 | Klik preset langsung menerapkan tema; tema aktif memiliki indikator terpilih | ✅ | P1 |
+| AC-9 | Konfigurasi tema tersimpan sebagai bagian dari form definition JSON | ✅ | P0 |
+| AC-10 | Color picker untuk warna background pertanyaan (questionBackgroundColor) | ⚠️ P | P1 |
 
 ---
 
@@ -1519,16 +1531,136 @@ Fitur-fitur berikut **tidak termasuk** dalam versi 1.0.0 ini:
 
 ---
 
+## 9. Fitur Baru Google Forms 2026 (Update v1.1)
+
+> [!IMPORTANT]
+> Bagian ini ditambahkan pada **23 Juni 2026** berdasarkan hasil audit parity. Semua item di sini adalah **P0** karena merupakan fitur native Google Forms yang belum diimplementasikan.
+
+### 9.1 Response Cap & Auto-Close
+
+Google Forms per Desember 2025 memperkenalkan kemampuan untuk **menutup form secara otomatis** berdasarkan:
+1. **Batas jumlah respons** — form otomatis tertutup setelah N respons terkumpul
+2. **Batas tanggal & waktu** — form otomatis tertutup pada tanggal/jam tertentu
+
+**US-070 — Batas Respons Otomatis** `[P0]`
+
+| # | Acceptance Criteria |
+|---|-------------------|
+| AC-1 | Field `maxResponses: number\|null` tersedia di FormMetadata |
+| AC-2 | SettingsPanel menampilkan input "Batas maksimal respons" (number, optional) |
+| AC-3 | FormRenderer mengecek jumlah respons yang tersimpan vs `maxResponses` saat form dibuka |
+| AC-4 | Jika batas tercapai: tampilkan halaman "Formulir ini sudah tidak menerima respons" (identik GForms) |
+| AC-5 | Response Dashboard menampilkan indikator "X / N respons" jika cap aktif |
+| AC-6 | Backward compatible: form lama tanpa `maxResponses` tetap berfungsi normal |
+
+**US-071 — Tanggal Tutup Otomatis** `[P0]`
+
+| # | Acceptance Criteria |
+|---|-------------------|
+| AC-1 | Field `closingDate: string\|null` (ISO-8601) tersedia di FormMetadata |
+| AC-2 | SettingsPanel menampilkan datetime-local input "Tutup otomatis pada" |
+| AC-3 | FormRenderer mengecek `new Date() > new Date(closingDate)` saat form dibuka |
+| AC-4 | Jika tanggal lewat: tampilkan halaman form tertutup dengan timestamp penutupan |
+| AC-5 | Badge di Response Dashboard menampilkan "Ditutup otomatis pada [tanggal]" |
+
+### 9.2 Opsi "Lainnya" (Other Option)
+
+Fitur native Google Forms yang wajib ada di Multiple Choice dan Checkboxes:
+
+**US-072 — Opsi "Lainnya" di Multiple Choice** `[P0]`
+
+| # | Acceptance Criteria |
+|---|-------------------|
+| AC-1 | Editor: tombol "Tambah opsi 'Lainnya'" tersedia di bawah daftar opsi Multiple Choice |
+| AC-2 | Opsi "Lainnya" ditampilkan italic dan tidak bisa diedit (berbeda dari opsi biasa) |
+| AC-3 | Renderer: opsi "Lainnya" muncul sebagai radio dengan text input di sampingnya |
+| AC-4 | Saat "Lainnya" dipilih, text input menjadi wajib (jika pertanyaan wajib) |
+| AC-5 | Nilai tersimpan sebagai `{isOther: true, text: "isian bebas responden"}` |
+| AC-6 | Export CSV: kolom "Lainnya" menampilkan teks yang diisi responden |
+
+**US-073 — Opsi "Lainnya" di Checkboxes** `[P0]`
+
+| # | Acceptance Criteria |
+|---|-------------------|
+| AC-1 | Editor: tombol "Tambah opsi 'Lainnya'" tersedia di bawah daftar opsi Checkboxes |
+| AC-2 | Renderer: opsi "Lainnya" muncul sebagai checkbox dengan text input di sampingnya |
+| AC-3 | Saat "Lainnya" dicentang, text input menjadi aktif |
+| AC-4 | Nilai tersimpan sebagai array yang bisa mengandung `{isOther: true, text: "..."}` |
+
+### 9.3 Header Image
+
+**US-074 — Upload & Render Header Image** `[P0]`
+
+| # | Acceptance Criteria |
+|---|-------------------|
+| AC-1 | ThemePanel: tombol upload/set gambar header |
+| AC-2 | Support file input (PNG/JPG/GIF, max 5MB) dan URL langsung |
+| AC-3 | Gambar dikonversi ke base64 dan disimpan di `form.metadata.headerImageUrl` |
+| AC-4 | Renderer: gambar ditampilkan di bagian atas form, di atas judul — full-width |
+| AC-5 | Tinggi gambar header: 192px (identik Google Forms) |
+| AC-6 | Tombol "Hapus Gambar" tersedia di ThemePanel |
+
+### 9.4 Back Button Navigasi
+
+**US-075 — Navigasi Mundur Antar Section** `[P0]`
+
+| # | Acceptance Criteria |
+|---|-------------------|
+| AC-1 | Tombol "← Kembali" muncul di semua section kecuali section pertama |
+| AC-2 | Klik "Kembali" navigasi ke section sebelumnya TANPA menghapus jawaban |
+| AC-3 | Progress bar menurun saat navigasi mundur |
+| AC-4 | Branching history disimpan sehingga navigasi mundur kembali ke section yang benar |
+
+### 9.5 QR Code Fix (Violation Fix)
+
+**US-076 — QR Code Client-side** `[P0 — BUG FIX]`
+
+> [!CAUTION]
+> Implementasi saat ini menggunakan `https://api.qrserver.com/...` yang **melanggar prinsip CLIENT-SIDE FIRST** dan **DATA SOVEREIGNTY**. URL form dikirim ke server pihak ketiga. HARUS diperbaiki.
+
+| # | Acceptance Criteria |
+|---|-------------------|
+| AC-1 | QR Code dibuat sepenuhnya di browser, TANPA network request |
+| AC-2 | Implementasi menggunakan lazy-loaded vanilla JS library atau implementasi custom |
+| AC-3 | QR Code tetap bisa di-download sebagai PNG |
+| AC-4 | Loading indicator saat library pertama kali di-load |
+
+---
+
 ## Lampiran
 
-### Lampiran A: Glosarium
+### Lampiran A: Schema FormMetadata (v1.1 — Updated)
+
+```javascript
+/**
+ * @typedef {Object} FormMetadata
+ * @property {string} title - Max 500 char
+ * @property {string} description - Max 2000 char
+ * @property {string|null} headerImageUrl - URL atau base64 gambar header
+ * @property {string} createdAt - ISO-8601
+ * @property {string} updatedAt - ISO-8601
+ * @property {boolean} isAcceptingResponses - Toggle menerima jawaban
+ * @property {string} confirmationMessage - Pesan setelah submit
+ * @property {boolean} showProgressBar - Tampilkan progress bar
+ * @property {boolean} shuffleQuestions - Acak urutan pertanyaan
+ * @property {boolean} limitOneResponse - Batasi 1 jawaban per sesi
+ * @property {number|null} maxResponses - [BARU v1.1] Batas maksimal respons, null = unlimited
+ * @property {string|null} closingDate - [BARU v1.1] ISO-8601 tanggal tutup otomatis
+ * @property {boolean} collectEmail - [BARU v1.1] Kumpulkan alamat email responden
+ * @property {boolean} showSummaryToRespondents - [BARU v1.1] Tampilkan ringkasan ke responden
+ * @property {string|null} webhookUrl - URL webhook (HTTPS only)
+ * @property {string|null} webhookSecret - HMAC signing secret
+ */
+```
+
+### Lampiran B: Glosarium
 
 | Istilah | Definisi |
 |---------|----------|
 | **Form Definition** | Struktur JSON yang mendefinisikan konten, tipe pertanyaan, dan konfigurasi sebuah formulir |
 | **Response** | Kumpulan jawaban dari satu sesi pengisian formulir oleh satu responden |
 | **Question Type** | Kategori input yang didukung (teks, pilihan, skala, dll) |
-| **Section** | Pengelompokan pertanyaan dalam satu halaman/halaman formulir |
+| **Section** | Pengelompokan pertanyaan dalam satu halaman formulir |
 | **Conditional Logic** | Aturan yang menentukan alur navigasi berdasarkan jawaban responden |
 | **Validation** | Pemeriksaan kebenaran format/nilai input sebelum diterima |
 | **Renderer** | Komponen yang menampilkan form untuk diisi oleh responden |
@@ -1540,29 +1672,34 @@ Fitur-fitur berikut **tidak termasuk** dalam versi 1.0.0 ini:
 | **Prefill** | Mengisi nilai awal pertanyaan via URL query parameter |
 | **Parity** | Kesetaraan fitur dan perilaku dengan produk referensi (Google Forms) |
 | **Event Bus** | Pola komunikasi publish/subscribe antar modul tanpa coupling langsung |
+| **Response Cap** | [BARU] Batas jumlah respons yang dapat diterima sebelum form otomatis ditutup |
+| **Closing Date** | [BARU] Tanggal dan waktu form otomatis berhenti menerima respons |
+| **Other Option** | [BARU] Opsi "Lainnya" dengan text input bebas di Multiple Choice dan Checkboxes |
 
-### Lampiran B: Ringkasan Prioritas
+### Lampiran C: Ringkasan Prioritas (v1.1)
 
 | Prioritas | Jumlah Requirements | Definisi |
 |:---------:|:-------------------:|----------|
-| **P0** | ~45 items | Wajib untuk MVP — must have |
-| **P1** | ~25 items | Segera setelah MVP — should have |
-| **P2** | ~10 items | Diinginkan, bisa ditunda — nice to have |
+| **P0** | ~55 items | Wajib — termasuk semua gap parity dengan Google Forms Juni 2026 |
+| **P1** | ~25 items | Segera setelah P0 selesai |
+| **P2** | ~10 items | Diinginkan, bisa ditunda |
 
-### Lampiran C: Daftar Asumsi yang Perlu Direview
+### Lampiran D: Audit History
 
-> [!WARNING]
-> Asumsi berikut ditandai karena **tidak eksplisit** dalam draf kasar. Harap tinjau dan konfirmasi sebelum development dimulai.
+| Tanggal | Versi | Auditor | Skor Parity | Catatan |
+|---------|-------|---------|:-----------:|--------|
+| 2026-06-23 | v1.1 | Antigravity AI | 83% | Gap utama: Other option, Response Cap, Closing Date, QR fix, Header image |
+
+### Lampiran E: Daftar Asumsi
 
 1. **[A1]** Aplikasi sepenuhnya client-side, tidak ada backend wajib
-2. **[A2]** Routing menggunakan hash-based routing
-3. **[A5]** Dashboard menggunakan card grid layout
+2. **[A2]** Routing menggunakan query parameter (`?formId=...`), bukan hash
+3. **[A5]** Dashboard menggunakan card grid layout (identik Google Forms home)
 4. **[A7]** Bahasa UI default: Bahasa Indonesia
-5. **[A8]** Respons disimpan di localStorage browser pembuat form (bukan browser responden, kecuali via webhook)
-6. **[ASUMSI BARU]** Tidak ada mekanisme autentikasi untuk mengakses editor — siapa pun yang mengakses URL editor dapat mengedit form
-7. **[ASUMSI BARU]** Tidak ada versioning form — respons tetap merujuk ke struktur form saat submit
-8. **[ASUMSI BARU]** QR Code library (QRCode.js) dimasukkan sebagai dependency opsional, bukan bagian dari bundle core
+5. **[A8]** Respons disimpan di localStorage browser responden; Form definition di localStorage browser creator
+6. **[A9]** QR Code menggunakan lazy-loaded vanilla JS (BUKAN API eksternal)
+7. **[A10]** Header image disimpan sebagai base64 di localStorage (bukan server upload)
 
 ---
 
-> **Dokumen ini adalah PRD final untuk Dynamic Form Builder v1.0.0 dan menjadi referensi utama bagi tim engineering yang mengimplementasikan sistem ini. Keputusan teknis detail lebih lanjut didokumentasikan di `design.md`.**
+> **Dokumen ini adalah PRD aktif untuk Dynamic Form Builder v1.1.0 — Google Forms 1:1 Clone. Diperbarui setiap kali ada gap parity yang teridentifikasi. Versi terakhir: 23 Juni 2026.**

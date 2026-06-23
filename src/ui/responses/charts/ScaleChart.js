@@ -2,7 +2,18 @@
  * ScaleChart — distribusi skala linear (bar chart vertikal).
  */
 
-const COLORS = ['#4285F4', '#4285F4', '#4285F4', '#4285F4', '#4285F4', '#FBBC04', '#FBBC04', '#EA4335', '#EA4335', '#EA4335'];
+const COLORS = [
+  '#4285F4',
+  '#4285F4',
+  '#4285F4',
+  '#4285F4',
+  '#4285F4',
+  '#FBBC04',
+  '#FBBC04',
+  '#EA4335',
+  '#EA4335',
+  '#EA4335',
+];
 
 export class ScaleChart {
   /**

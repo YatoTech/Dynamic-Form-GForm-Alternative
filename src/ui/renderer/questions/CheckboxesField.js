@@ -41,6 +41,11 @@ export class CheckboxesField {
       input.className = 'gf-checkbox-input';
       input.value = '__other__';
 
+      const otherVal = selected.find((val) => !choices.includes(val));
+      if (otherVal !== undefined) {
+        input.checked = true;
+      }
+
       const visual = document.createElement('div');
       visual.className = 'gf-checkbox-visual';
       visual.setAttribute('aria-hidden', 'true');
@@ -58,7 +63,8 @@ export class CheckboxesField {
       otherInput.type = 'text';
       otherInput.className = 'gf-other-input';
       otherInput.placeholder = 'Isi jawaban Anda';
-      otherInput.style.display = 'none';
+      otherInput.style.display = input.checked ? 'inline-block' : 'none';
+      otherInput.value = otherVal !== undefined ? otherVal : '';
 
       const otherWrap = document.createElement('div');
       otherWrap.className = 'gf-other-wrap';

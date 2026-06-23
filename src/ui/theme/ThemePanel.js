@@ -60,6 +60,94 @@ export class ThemePanel {
     section.appendChild(presetGrid);
     container.appendChild(section);
 
+    // ─── GAMBAR HEADER ───
+    const headerImageSection = document.createElement('div');
+    headerImageSection.className = 'dfb-theme-header-image-section';
+    headerImageSection.style.cssText = 'border-bottom: 1px solid var(--dfb-border-color, #dadce0); padding-bottom: 12px; margin-bottom: 12px;';
+
+    const headerImageTitle = document.createElement('p');
+    headerImageTitle.textContent = 'GAMBAR HEADER';
+    headerImageTitle.className = 'dfb-theme-section-title';
+    headerImageSection.appendChild(headerImageTitle);
+
+    if (form.metadata.headerImageUrl) {
+      const imgPreviewContainer = document.createElement('div');
+      imgPreviewContainer.style.cssText = 'position:relative; margin-bottom:8px; border-radius:4px; overflow:hidden; border:1px solid var(--dfb-border-color,#dadce0); height:80px;';
+
+      const img = document.createElement('img');
+      img.src = form.metadata.headerImageUrl;
+      img.style.cssText = 'width:100%; height:100%; object-fit:cover;';
+      imgPreviewContainer.appendChild(img);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'dfb-btn-export';
+      removeBtn.style.cssText = 'width:100%; margin-top:4px; color:var(--dfb-error-color,#d93025); border-color:var(--dfb-error-color,#d93025);';
+      removeBtn.textContent = 'Hapus Gambar';
+      removeBtn.addEventListener('click', () => {
+        form.metadata.headerImageUrl = null;
+        form.metadata.updatedAt = new Date().toISOString();
+        FormManager.save(form);
+        eventBus.emit('form:updated', form);
+        ThemePanel.render(form, container);
+      });
+
+      headerImageSection.appendChild(imgPreviewContainer);
+      headerImageSection.appendChild(removeBtn);
+    } else {
+      const uploadContainer = document.createElement('div');
+      uploadContainer.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/*';
+      fileInput.style.display = 'none';
+      uploadContainer.appendChild(fileInput);
+
+      const uploadBtn = document.createElement('button');
+      uploadBtn.className = 'dfb-btn-export';
+      uploadBtn.textContent = 'Pilih Gambar (File)';
+      uploadBtn.style.width = '100%';
+      uploadBtn.addEventListener('click', () => fileInput.click());
+      uploadContainer.appendChild(uploadBtn);
+
+      fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          form.metadata.headerImageUrl = e.target.result;
+          form.metadata.updatedAt = new Date().toISOString();
+          FormManager.save(form);
+          eventBus.emit('form:updated', form);
+          ThemePanel.render(form, container);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      const urlInput = document.createElement('input');
+      urlInput.type = 'text';
+      urlInput.placeholder = 'Atau masukkan URL Gambar...';
+      urlInput.className = 'dfb-settings-text-input';
+      urlInput.style.cssText = 'font-size:12px; padding:6px 8px; width:100%; box-sizing:border-box;';
+      urlInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const val = urlInput.value.trim();
+          if (val) {
+            form.metadata.headerImageUrl = val;
+            form.metadata.updatedAt = new Date().toISOString();
+            FormManager.save(form);
+            eventBus.emit('form:updated', form);
+            ThemePanel.render(form, container);
+          }
+        }
+      });
+      uploadContainer.appendChild(urlInput);
+
+      headerImageSection.appendChild(uploadContainer);
+    }
+    container.appendChild(headerImageSection);
+
+    // ─── KUSTOM TEMA ───
     const customSection = document.createElement('div');
     customSection.className = 'dfb-theme-custom-section';
 
@@ -80,6 +168,15 @@ export class ThemePanel {
     customSection.appendChild(
       ColorPicker.create('Warna Background', form.theme.backgroundColor, (color) => {
         form.theme.backgroundColor = color;
+        applyTheme(form.theme);
+        FormManager.save(form);
+        eventBus.emit('theme:changed', form.theme);
+      }),
+    );
+
+    customSection.appendChild(
+      ColorPicker.create('Warna Background Pertanyaan', form.theme.questionBackgroundColor || '#FFFFFF', (color) => {
+        form.theme.questionBackgroundColor = color;
         applyTheme(form.theme);
         FormManager.save(form);
         eventBus.emit('theme:changed', form.theme);

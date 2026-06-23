@@ -19,12 +19,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-img, svg {
+img,
+svg {
   display: block;
   max-width: 100%;
 }
 
-input, select, textarea, button {
+input,
+select,
+textarea,
+button {
   font: inherit;
 }
 
@@ -39,12 +43,17 @@ a {
   text-decoration: none;
 }
 
-ul, ol {
+ul,
+ol {
   list-style: none;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: inherit;
   font-size: inherit;
 }
-

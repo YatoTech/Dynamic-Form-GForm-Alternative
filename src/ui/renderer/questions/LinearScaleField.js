@@ -1,6 +1,7 @@
 export class LinearScaleField {
   static create(question, value = '') {
     const wrapper = document.createElement('div');
+    wrapper.className = 'gf-scale-wrapper';
 
     const min = question.options?.minScale ?? 1;
     const max = question.options?.maxScale ?? 5;
@@ -8,26 +9,27 @@ export class LinearScaleField {
     const rightLabel = question.options?.rightLabel || '';
     const name = `q-scale-${question.questionId}`;
 
-    if (leftLabel || rightLabel) {
-      const labels = document.createElement('div');
-      labels.className = 'gf-scale-labels-wrap';
-      const left = document.createElement('span');
-      left.className = 'gf-scale-label-left';
+    if (leftLabel) {
+      const left = document.createElement('div');
+      left.className = 'gf-scale-label gf-scale-label-left';
       left.textContent = leftLabel;
-      labels.appendChild(left);
-      const right = document.createElement('span');
-      right.className = 'gf-scale-label-right';
-      right.textContent = rightLabel;
-      labels.appendChild(right);
-      wrapper.appendChild(labels);
+      wrapper.appendChild(left);
     }
 
-    const circles = document.createElement('div');
-    circles.className = 'gf-scale-circles';
+    const optionsContainer = document.createElement('div');
+    optionsContainer.className = 'gf-scale-options-container';
 
     for (let i = min; i <= max; i++) {
-      const item = document.createElement('div');
-      item.className = 'gf-scale-item';
+      const col = document.createElement('div');
+      col.className = 'gf-scale-option-col';
+
+      const numSpan = document.createElement('span');
+      numSpan.className = 'gf-scale-option-num';
+      numSpan.textContent = String(i);
+      col.appendChild(numSpan);
+
+      const label = document.createElement('label');
+      label.className = 'gf-scale-radio-wrap';
 
       const input = document.createElement('input');
       input.type = 'radio';
@@ -35,23 +37,25 @@ export class LinearScaleField {
       input.name = name;
       input.value = String(i);
       if (String(i) === String(value)) input.checked = true;
+      label.appendChild(input);
 
-      const circle = document.createElement('div');
-      circle.className = 'gf-scale-circle' + (String(i) === String(value) ? ' gf-scale-circle--selected' : '');
-      circle.textContent = String(i);
+      const visual = document.createElement('div');
+      visual.className = 'gf-scale-radio-visual';
+      label.appendChild(visual);
 
-      item.appendChild(input);
-      item.appendChild(circle);
-      circles.appendChild(item);
-
-      circle.addEventListener('click', () => {
-        input.checked = true;
-        circles.querySelectorAll('.gf-scale-circle--selected').forEach((c) => c.classList.remove('gf-scale-circle--selected'));
-        circle.classList.add('gf-scale-circle--selected');
-      });
+      col.appendChild(label);
+      optionsContainer.appendChild(col);
     }
 
-    wrapper.appendChild(circles);
+    wrapper.appendChild(optionsContainer);
+
+    if (rightLabel) {
+      const right = document.createElement('div');
+      right.className = 'gf-scale-label gf-scale-label-right';
+      right.textContent = rightLabel;
+      wrapper.appendChild(right);
+    }
+
     return wrapper;
   }
 }

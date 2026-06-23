@@ -14,7 +14,7 @@
 .dfb-theme-section-title {
   font-size: 11px;
   font-weight: 500;
-  color: var(--dfb-text-secondary, #5F6368);
+  color: var(--dfb-text-secondary, #5f6368);
   text-transform: uppercase;
   margin-bottom: 8px;
   letter-spacing: 0.5px;
@@ -34,20 +34,22 @@
   background: transparent;
   border: 2px solid transparent;
   cursor: pointer;
-  transition: border-color 200ms ease, background 200ms ease;
+  transition:
+    border-color 200ms ease,
+    background 200ms ease;
 }
 .dfb-theme-preset-btn:hover {
   background: #f1f3f4;
 }
 .dfb-theme-preset-btn--active {
-  border-color: var(--dfb-primary-color, #673AB7);
+  border-color: var(--dfb-primary-color, #673ab7);
   background: #e8f0fe;
 }
 .dfb-theme-preset-swatch {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 2px solid var(--dfb-border-color, #DADCE0);
+  border: 2px solid var(--dfb-border-color, #dadce0);
 }
 .dfb-theme-preset-name {
   font-size: 11px;
@@ -55,7 +57,7 @@
 }
 
 .dfb-theme-custom-section {
-  border-top: 1px solid var(--dfb-border-color, #DADCE0);
+  border-top: 1px solid var(--dfb-border-color, #dadce0);
   padding-top: 12px;
 }
 
@@ -77,7 +79,7 @@
   border-radius: 50%;
   cursor: pointer;
   padding: 0;
-  border: 2px solid var(--dfb-border-color, #DADCE0);
+  border: 2px solid var(--dfb-border-color, #dadce0);
 }
 .dfb-color-input::-webkit-color-swatch-wrapper {
   padding: 0;
@@ -100,7 +102,7 @@
 }
 .dfb-font-select {
   padding: 6px 12px;
-  border: 1px solid var(--dfb-border-color, #DADCE0);
+  border: 1px solid var(--dfb-border-color, #dadce0);
   border-radius: 4px;
   font-size: 13px;
   background: #fff;
@@ -115,7 +117,7 @@
 .dfb-share-tab-bar {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid var(--dfb-border-color, #DADCE0);
+  border-bottom: 1px solid var(--dfb-border-color, #dadce0);
   margin-bottom: 16px;
 }
 .dfb-share-tab {
@@ -124,12 +126,12 @@
   background: none;
   cursor: pointer;
   font-size: 13px;
-  color: var(--dfb-text-secondary, #5F6368);
+  color: var(--dfb-text-secondary, #5f6368);
   border-bottom: 2px solid transparent;
 }
 .dfb-share-tab--active {
-  color: var(--dfb-primary-color, #673AB7);
-  border-bottom-color: var(--dfb-primary-color, #673AB7);
+  color: var(--dfb-primary-color, #673ab7);
+  border-bottom-color: var(--dfb-primary-color, #673ab7);
   font-weight: 500;
 }
 .dfb-share-tab-content {
@@ -144,7 +146,7 @@
 .dfb-share-field input {
   flex: 1;
   padding: 10px 12px;
-  border: 1px solid var(--dfb-border-color, #DADCE0);
+  border: 1px solid var(--dfb-border-color, #dadce0);
   border-radius: 4px;
   font-size: 13px;
   outline: none;
@@ -152,7 +154,7 @@
 .dfb-share-copy-btn {
   padding: 8px 16px;
   border-radius: 4px;
-  background: var(--dfb-primary-color, #673AB7);
+  background: var(--dfb-primary-color, #673ab7);
   color: #fff;
   border: none;
   cursor: pointer;
@@ -172,11 +174,10 @@
   width: 100%;
   min-height: 80px;
   padding: 10px;
-  border: 1px solid var(--dfb-border-color, #DADCE0);
+  border: 1px solid var(--dfb-border-color, #dadce0);
   border-radius: 4px;
   font-size: 12px;
   font-family: monospace;
   outline: none;
   resize: vertical;
 }
-

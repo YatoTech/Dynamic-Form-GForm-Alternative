@@ -58,7 +58,9 @@ export class McGridField {
         td.addEventListener('click', () => {
           const name = input.name;
           const allInputs = wrapper.querySelectorAll(`input[name="${name}"]`);
-          allInputs.forEach((inp) => { inp.checked = false; });
+          allInputs.forEach((inp) => {
+            inp.checked = false;
+          });
           input.checked = true;
         });
       });

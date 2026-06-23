@@ -71,6 +71,18 @@ export function validateField(value, config) {
     }
   }
 
+  if (config.minTime || config.maxTime) {
+    const timeVal = value ? String(value) : '';
+    if (timeVal) {
+      if (config.minTime && timeVal < config.minTime) {
+        return withCustom(`Waktu harus setelah ${config.minTime}`, config);
+      }
+      if (config.maxTime && timeVal > config.maxTime) {
+        return withCustom(`Waktu harus sebelum ${config.maxTime}`, config);
+      }
+    }
+  }
+
   return { isValid: true, error: null };
 }
 

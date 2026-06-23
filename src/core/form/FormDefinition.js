@@ -26,6 +26,10 @@ export class FormDefinition {
       showProgressBar: data.metadata?.showProgressBar ?? true,
       shuffleQuestions: data.metadata?.shuffleQuestions ?? false,
       limitOneResponse: data.metadata?.limitOneResponse ?? false,
+      maxResponses: data.metadata?.maxResponses ?? null,
+      closingDate: data.metadata?.closingDate ?? null,
+      collectEmail: data.metadata?.collectEmail ?? false,
+      showSummaryToRespondents: data.metadata?.showSummaryToRespondents ?? false,
       webhookUrl: data.metadata?.webhookUrl || null,
       webhookSecret: data.metadata?.webhookSecret || null,
     };

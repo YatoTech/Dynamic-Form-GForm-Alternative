@@ -1,21 +1,22 @@
 :root {
   /* Brand / Theme (dapat diubah user) */
-  --dfb-primary-color: #673AB7;
-  --dfb-primary-light: #7E57C2;
-  --dfb-primary-dark: #5E35B1;
-  --dfb-bg-color: #F0EBF8;
-  --dfb-card-bg: #FFFFFF;
-  --dfb-font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --dfb-primary-color: #673ab7;
+  --dfb-primary-light: #7e57c2;
+  --dfb-primary-dark: #5e35b1;
+  --dfb-bg-color: #f0ebf8;
+  --dfb-card-bg: #ffffff;
+  --dfb-font-family: 'Outfit', 'Roboto', sans-serif;
 
   /* Status Colors */
-  --dfb-error-color: #D93025;
+  --dfb-error-color: #d93025;
   --dfb-success-color: #188038;
-  --dfb-warning-color: #F9AB00;
+  --dfb-warning-color: #f9ab00;
   --dfb-text-primary: #202124;
-  --dfb-text-secondary: #5F6368;
-  --dfb-border-color: #DADCE0;
-  --dfb-border-radius: 8px;
-  --dfb-border-radius-sm: 4px;
+  --dfb-text-secondary: #5f6368;
+  --dfb-border-color: #dadce0;
+  --dfb-border-radius: 12px;
+  --dfb-border-radius-sm: 6px;
+  --dfb-border-radius-pill: 100px;
 
   /* Spacing scale */
   --dfb-space-xs: 4px;
@@ -31,10 +32,44 @@
   --dfb-transition-slow: 300ms;
 
   /* Shadows — Google Forms Material */
-  --dfb-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
-  --dfb-shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
-  --dfb-shadow-fab: 0 3px 6px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.12);
-  --dfb-shadow-toolbar: 0 2px 6px rgba(0, 0, 0, 0.15);
-  --dfb-shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.18);
+  --dfb-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.05);
+  --dfb-shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --dfb-shadow-fab: 0 3px 6px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+  --dfb-shadow-toolbar: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --dfb-shadow-dropdown: 0 4px 20px rgba(0, 0, 0, 0.12);
 }
 
+/* Material 3 Ripple Effect styling */
+.dfb-ripple-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dfb-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.08);
+  transform: scale(0);
+  animation: dfb-ripple-anim 500ms cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+/* For primary dark buttons, make ripple white */
+.dfb-editor-btn-send .dfb-ripple,
+.dfb-btn--primary .dfb-ripple,
+.dfb-editor-btn-add-q .dfb-ripple {
+  background-color: rgba(255, 255, 255, 0.24);
+}
+
+@keyframes dfb-ripple-anim {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
