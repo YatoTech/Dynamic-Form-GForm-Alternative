@@ -1,0 +1,31 @@
+export const QUESTION_TYPES = {
+  SHORT_ANSWER: 'short_answer',
+  PARAGRAPH: 'paragraph',
+  MULTIPLE_CHOICE: 'multiple_choice',
+  CHECKBOXES: 'checkboxes',
+  DROPDOWN: 'dropdown',
+  LINEAR_SCALE: 'linear_scale',
+  MULTIPLE_CHOICE_GRID: 'mc_grid',
+  CHECKBOX_GRID: 'checkbox_grid',
+  DATE: 'date',
+  TIME: 'time',
+  FILE_UPLOAD: 'file_upload',
+  SECTION_HEADER: 'section_header',
+  RATING: 'rating',
+};
+
+export const QUESTION_TYPE_LABELS = {
+  [QUESTION_TYPES.SHORT_ANSWER]: 'Isian Singkat',
+  [QUESTION_TYPES.PARAGRAPH]: 'Paragraf',
+  [QUESTION_TYPES.MULTIPLE_CHOICE]: 'Pilihan Ganda',
+  [QUESTION_TYPES.CHECKBOXES]: 'Kotak Centang',
+  [QUESTION_TYPES.DROPDOWN]: 'Dropdown',
+  [QUESTION_TYPES.LINEAR_SCALE]: 'Skala Linear',
+  [QUESTION_TYPES.MULTIPLE_CHOICE_GRID]: 'Grid Pilihan Ganda',
+  [QUESTION_TYPES.CHECKBOX_GRID]: 'Grid Kotak Centang',
+  [QUESTION_TYPES.DATE]: 'Tanggal',
+  [QUESTION_TYPES.TIME]: 'Waktu',
+  [QUESTION_TYPES.FILE_UPLOAD]: 'Unggah File',
+  [QUESTION_TYPES.SECTION_HEADER]: 'Judul Seksi',
+  [QUESTION_TYPES.RATING]: 'Rating',
+};

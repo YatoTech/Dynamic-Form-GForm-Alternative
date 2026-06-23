@@ -1,0 +1,28 @@
+/* Preset themes via CSS custom properties */
+/* Default theme is defined in variables.css */
+
+.dfb-theme-poppy {
+  --dfb-primary-color: #E53935;
+  --dfb-bg-color: #FBE9E7;
+}
+
+.dfb-theme-flamingo {
+  --dfb-primary-color: #F06292;
+  --dfb-bg-color: #FCE4EC;
+}
+
+.dfb-theme-blueberry {
+  --dfb-primary-color: #3949AB;
+  --dfb-bg-color: #E8EAF6;
+}
+
+.dfb-theme-sage {
+  --dfb-primary-color: #558B2F;
+  --dfb-bg-color: #F1F8E9;
+}
+
+.dfb-theme-spearmint {
+  --dfb-primary-color: #00897B;
+  --dfb-bg-color: #E0F2F1;
+}
+

@@ -1,0 +1,40 @@
+:root {
+  /* Brand / Theme (dapat diubah user) */
+  --dfb-primary-color: #673AB7;
+  --dfb-primary-light: #7E57C2;
+  --dfb-primary-dark: #5E35B1;
+  --dfb-bg-color: #F0EBF8;
+  --dfb-card-bg: #FFFFFF;
+  --dfb-font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Status Colors */
+  --dfb-error-color: #D93025;
+  --dfb-success-color: #188038;
+  --dfb-warning-color: #F9AB00;
+  --dfb-text-primary: #202124;
+  --dfb-text-secondary: #5F6368;
+  --dfb-border-color: #DADCE0;
+  --dfb-border-radius: 8px;
+  --dfb-border-radius-sm: 4px;
+
+  /* Spacing scale */
+  --dfb-space-xs: 4px;
+  --dfb-space-sm: 8px;
+  --dfb-space-md: 16px;
+  --dfb-space-lg: 24px;
+  --dfb-space-xl: 32px;
+  --dfb-space-2xl: 48px;
+
+  /* Transitions */
+  --dfb-transition-fast: 150ms;
+  --dfb-transition-normal: 200ms;
+  --dfb-transition-slow: 300ms;
+
+  /* Shadows — Google Forms Material */
+  --dfb-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+  --dfb-shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+  --dfb-shadow-fab: 0 3px 6px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.12);
+  --dfb-shadow-toolbar: 0 2px 6px rgba(0, 0, 0, 0.15);
+  --dfb-shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
